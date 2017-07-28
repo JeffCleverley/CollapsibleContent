@@ -45,6 +45,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace  Deftly\CollapsibleContent;
 
+use function Composer\Autoload\includeFile;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit( "Nothing to see here, move along now...!" );
+}
+
+include( __DIR__ . '/src/shortcode/shortcodes.php' );
+
 function plugin_launch() {
 
 }
