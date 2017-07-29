@@ -33,6 +33,7 @@ function process_the_shortcode( $user_defined_attributes, $hidden_content, $shor
 		$shortcode_name
 	);
 
+	// Some processing
 	$attributes['show_icon'] = esc_attr( $attributes['show_icon'] );
 	if ( $hidden_content ) {
 		$hidden_content =  do_shortcode( $hidden_content );
@@ -54,8 +55,8 @@ function get_shortcode_configuration( $shortcode_name ) {
 	$config = [
 		'view'      =>  __DIR__ . '/views/' . $shortcode_name . '.php',
 		'defaults'  =>  [
-			'show_icon' =>  'dashicons dashicons-arrow-down-alt2',
-			'hide_icon' =>  'dashicons dashicons-arrow-up-alt2',
+			'show_icon' =>  'dashicons dashicons-arrow-down-alt2 show-icon',
+			'hide_icon' =>  'dashicons dashicons-arrow-up-alt2 hide-icon',
 		],
 	];
 
