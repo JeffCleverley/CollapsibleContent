@@ -103,7 +103,7 @@ let moduleSettings = {
   };
 
 	let distFilenames = {
-    concatScripts: 'jquery.project.js',
+    concatScripts: 'jquery.plugin.js',
   };
 
 	/************************************
