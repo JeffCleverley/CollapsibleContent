@@ -11,9 +11,11 @@
  */
 
 $text_domain = FAQ_MODULE_TEXT_DOMAIN;
-
-$help_header_first_list = __('Things to remember when adding or editing an FAQ:', $text_domain );
-$help_item1 = __('Make sure you clearly explain the question and give content to why it might cause a problem for someone, if possible.', $text_domain );
+$obj = get_post_type_object( $custom_post_type );
+$description = esc_html( $obj->description );
+$help_header_first_list = __('FAQ Help', $text_domain );
+$help_item_description = __( $description, $text_domain );
+$help_item1 = __('Make sure you concisely explain the question and give content to why it might cause a problem for someone, if possible.', $text_domain );
 $help_item2 = __('Clearly explain your answer, try to imagine how a user reading your answer might interpret it. Give examples where needed. Consider saving the FAQ as a draft and coming back to it later.', $text_domain );
 $help_header_second_list = __('If you want to schedule the '. $custom_post_type_name . ' to be published in the future:', $text_domain );
 $help_item4 =  __('Under the Publish module, click on the Edit link next to Publish.', $text_domain );
@@ -25,6 +27,7 @@ ob_start();
 ?>
 	<div>
 		<h3><?php echo $help_header_first_list ?></h3>
+        <p><?php echo $help_item_description ?></p>
 		<ul>
 			<li><?php echo $help_item1 ?></li>
 			<li><?php echo $help_item2 ?></li>

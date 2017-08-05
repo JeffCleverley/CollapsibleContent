@@ -21,37 +21,43 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
  */
 function register_custom_post_types() {
 
-	$my_custom_post_types_configs = [
+	//Using configs array allows for multiple CPTs to be created at once with different configurations.
+	$cpt_configs = array(
 		[   'slug'                  => 'faq',
 		    'singular_name'         => 'FAQ',
 		    'plural_name'           => 'FAQs',
-		    'icon'                  => 'dashicons-format-chat',
-		    'excluded_functions'    => array(
-			    'excerpt',
-			    'comments',
-			    'trackbacks',
+		    'icon'                  => 'dashicons-editor-help',
+			'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
+			'public'                => true,
+			'hierarchical' 		    => false,
+			'has_archive'  		    => true,
+			'menu_position'		    => 5,
+			'show_in_rest'          => false,
+		    'excluded_features'     => array(
+                'excerpt',
+                'comments',
+                'trackbacks',
+			    'custom-fields',
 		    ) ],
-	];
+	);
 
-	foreach ( $my_custom_post_types_configs as $my_custom_post_type_config ) {
+	foreach ( $cpt_configs as $cpt_config ) {
 
-		$features = get_all_post_type_features_except_these( 'post', $my_custom_post_type_config['excluded_functions'] );
+		$features = get_all_post_type_features( 'post', $cpt_config['excluded_features'] );
+		$labels = post_type_label_config( $cpt_config['slug'], $cpt_config['singular_name'], $cpt_config['plural_name'] );
 
 		$args = [
-			'public'            => true,
-			'labels'       		=> post_type_label_config(
-				$my_custom_post_type_config['slug'],
-				$my_custom_post_type_config['singular_name'],
-				$my_custom_post_type_config['plural_name']
-			),
+			'public'            => $cpt_config['public'],
+			'labels'       		=> $labels,
+			'description'       => $cpt_config['description'],
 			'supports'     		=> $features,
-			'menu_icon'    		=> $my_custom_post_type_config['icon'],
-			'hierarchical' 		=> false,
-			'has_archive'  		=> true,
-			'menu_position'		=> 5,
-			'show_in_nav_menus'	=> true,
+			'menu_icon'    		=> $cpt_config['icon'],
+			'hierarchical' 		=> $cpt_config['hierarchical'],
+			'has_archive'  		=> $cpt_config['has_archive'],
+			'menu_position'		=> $cpt_config['menu_position'],
+			'show_in_rest'      => $cpt_config['show_in_rest'],
 		];
-		register_post_type( $my_custom_post_type_config['slug'], $args );
+		register_post_type( $cpt_config['slug'], $args );
 	}
 }
 /**
@@ -78,7 +84,12 @@ function post_type_label_config( $post_type, $singular_label, $plural_label) {
 		'new_item'           	=> __( 'New ' . $singular_label, $text_domain ),
 		'edit_item'          	=> __( 'Edit ' . $singular_label, $text_domain ),
 		'view_item'          	=> __( 'View ' . $singular_label, $text_domain ),
+		'view_items'          	=> __( 'View ' . $plural_label, $text_domain ),
 		'all_items'          	=> __( 'All ' . $plural_label, $text_domain ),
+		'archives'          	=> __( $singular_label . ' Archives', $text_domain ),
+		'attributes'          	=> __( $singular_label . ' Attributes', $text_domain ),
+		'insert_into_item'      => __( 'Insert in to ' . $singular_label, $text_domain ),
+		'uploaded_to_this_item' => __( 'Uploaded to this ' . $singular_label, $text_domain ),
 		'search_items'       	=> __( 'Search ' . $plural_label, $text_domain ),
 		'parent_item_colon'  	=> __( 'Parent ' .  $plural_label . ':', $text_domain ),
 		'not_found'          	=> __( 'No ' . $plural_label . ' found.', $text_domain ),
@@ -99,7 +110,7 @@ function post_type_label_config( $post_type, $singular_label, $plural_label) {
  *
  * @return 	array
  */
-function get_all_post_type_features_except_these( $post_type = 'post', $excluded_features = array() ) {
+function get_all_post_type_features( $post_type = 'post', $excluded_features = array() ) {
 	$configured_features = array_keys( get_all_post_type_supports( $post_type ) );
 
 	if ( ! $excluded_features ) {
