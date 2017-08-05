@@ -20,31 +20,17 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
  * @return void
  */
 function register_custom_post_types() {
-
-	//Using configs array allows for multiple CPTs to be created at once with different configurations.
-	$cpt_configs = array(
-		[   'slug'                  => 'faq',
-		    'singular_name'         => 'FAQ',
-		    'plural_name'           => 'FAQs',
-		    'icon'                  => 'dashicons-editor-help',
-			'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
-			'public'                => true,
-			'hierarchical' 		    => false,
-			'has_archive'  		    => true,
-			'menu_position'		    => 5,
-			'show_in_rest'          => false,
-		    'excluded_features'     => array(
-                'excerpt',
-                'comments',
-                'trackbacks',
-			    'custom-fields',
-		    ) ],
-	);
+	// Custom configs setting function in custom_configs.php
+	$cpt_configs = custom_post_type_configs();
 
 	foreach ( $cpt_configs as $cpt_config ) {
-
 		$features = get_all_post_type_features( 'post', $cpt_config['excluded_features'] );
-		$labels = post_type_label_config( $cpt_config['slug'], $cpt_config['singular_name'], $cpt_config['plural_name'] );
+		$labels = post_type_label_config(
+			$cpt_config['slug'],
+			$cpt_config['singular_name'],
+			$cpt_config['plural_name'],
+			$cpt_config['text_domain']
+		);
 
 		$args = [
 			'public'            => $cpt_config['public'],
@@ -65,16 +51,15 @@ function register_custom_post_types() {
  *
  * @since 	0.0.1
  *
- * @param   string  $post_type      provided by register_custom_post_types()
- * @param   string  $singular_label provided by register_custom_post_types()
- * @param   string  $plural_label   provided by register_custom_post_types()
+ * @param   string  $post_type      provided by register_custom_post_types() from custom_configs.php
+ * @param   string  $singular_label provided by register_custom_post_types() from custom_configs.php
+ * @param   string  $plural_label   provided by register_custom_post_types() from custom_configs.php
+ * @param   string  $text_domain   provided by register_custom_post_types() from custom_configs.php
  *
  * @return 	array
  */
-function post_type_label_config( $post_type, $singular_label, $plural_label) {
+function post_type_label_config( $post_type, $singular_label, $plural_label, $text_domain) {
 
-	$text_domain = FAQ_MODULE_TEXT_DOMAIN;
-	
 	return [
 		'name'                  => _x( $plural_label, 'post type general name', $text_domain ),
 		'singular_name'      	=> _x( $singular_label, 'post type singular name', $text_domain ),
@@ -133,54 +118,50 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  * @return 	array 	Amended post update messages with new CPT update messages.
  */
 function update_custom_post_type_messages( $messages ) {
+	$cpt_configs    =   custom_post_type_configs();
+	$post           =   get_post();
+	$post_type      =   get_post_type( $post );
 
-	$my_custom_post_types_slugs = [ 'faq', ];
-
-	$post             = get_post();
-	$post_type        = get_post_type( $post );
-
-	if ( ! in_array( $post_type, $my_custom_post_types_slugs ) ) {
+	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
 		return $messages;
 	}
 
-	foreach ( $my_custom_post_types_slugs as $key => $my_custom_post_type ) {
-
-		$post_type_object = get_post_type_object( $post_type );
-		$post_type_labels = $post_type_object->labels;
-		$post_type_name   = $post_type_labels->singular_name;
-		$text_domain = FAQ_MODULE_TEXT_DOMAIN;
+	foreach ( $cpt_configs as $key => $cpt_config ) {
+		$post_type_object   =   get_post_type_object( $post_type );
+		$post_type_labels   =   $post_type_object->labels;
+		$post_type_name     =   $post_type_labels->singular_name;
+		$text_domain        =   $cpt_config['text_domain'];
 
 		$messages[ $post_type ] = [
-			0  => '', // Unused. Messages start at index 1.
-			1  => __( $post_type_name . ' updated.', $text_domain ),
-			2  => __( 'Custom field updated.', $text_domain ),
-			3  => __( 'Custom field deleted.', $text_domain ),
-			4  => __( $post_type_name . ' updated.', $text_domain ),
+			0   =>  '', // Unused. Messages start at index 1.
+			1   =>   __( $post_type_name . ' updated.', $text_domain ),
+			2   =>  __( 'Custom field updated.', $text_domain ),
+			3   =>  __( 'Custom field deleted.', $text_domain ),
+			4   =>  __( $post_type_name . ' updated.', $text_domain ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( __( $post_type_name . ' restored to revision from %s', $text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => __( $post_type_name . ' published.', $text_domain ),
-			7  => __( $post_type_name . ' saved.', $text_domain ),
-			8  => __( $post_type_name . ' submitted.', $text_domain ),
-			9  => sprintf(
-				__( $post_type_name . ' scheduled for: <strong>%1$s</strong>.', $text_domain ),
-				// translators: Publish box date format, see http://php.net/date
-				date_i18n( __( 'M j, Y @ G:i', $text_domain ), strtotime( $post->post_date ) )
-			),
-			10 => __( $post_type_name . ' draft updated.', $text_domain )
+			5   =>  isset( $_GET['revision'] ) ? sprintf( __( $post_type_name . ' restored to revision from %s', $text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6   =>  __( $post_type_name . ' published.', $text_domain ),
+			7   =>  __( $post_type_name . ' saved.', $text_domain ),
+			8   =>  __( $post_type_name . ' submitted.', $text_domain ),
+			9   =>  sprintf(
+					__( $post_type_name . ' scheduled for: <strong>%1$s</strong>.', $text_domain ),
+					// translators: Publish box date format, see http://php.net/date
+					date_i18n( __( 'M j, Y @ G:i', $text_domain ), strtotime( $post->post_date ) )
+					),
+			10  =>  __( $post_type_name . ' draft updated.', $text_domain )
 		];
 
 		if ( $post_type_object->publicly_queryable ) {
+			$permalink  =   get_permalink( $post->ID );
+			$view_link  =   sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( 'View ' . $post_type_name, $text_domain ) );
+			$messages[ $post_type ][1]  .=  $view_link;
+			$messages[ $post_type ][6]  .=  $view_link;
+			$messages[ $post_type ][9]  .=  $view_link;
 
-			$permalink = get_permalink( $post->ID );
-			$view_link = sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( 'View ' . $post_type_name, $text_domain ) );
-			$messages[ $post_type ][1] .= $view_link;
-			$messages[ $post_type ][6] .= $view_link;
-			$messages[ $post_type ][9] .= $view_link;
-
-			$preview_permalink = add_query_arg( 'preview', 'true', $permalink );
-			$preview_link = sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( 'Preview ' . $post_type_name, $text_domain ) );
-			$messages[ $post_type ][8]  .= $preview_link;
-			$messages[ $post_type ][10] .= $preview_link;
+			$preview_permalink  =   add_query_arg( 'preview', 'true', $permalink );
+			$preview_link       =   sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( 'Preview ' . $post_type_name, $text_domain ) );
+			$messages[ $post_type ][8]  .=  $preview_link;
+			$messages[ $post_type ][10] .=  $preview_link;
 		}
 		return $messages;
 	}
@@ -199,31 +180,26 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
  */
 function add_help_text_to_custom_post_type() {
 
-	$screen = get_current_screen();
-	$post_type = $screen->post_type;
+	$screen      =  get_current_screen();
+	$post_type   =  $screen->post_type;
+	$cpt_configs =  custom_post_type_configs();
 
-	$my_custom_post_types = [
-		array(
-			'slug'          => 'faq',
-			'singular_name' => 'FAQ',
-		),
-	];
-
-	if ( ! in_array( $post_type, array_column( $my_custom_post_types, 'slug' ) ) ) {
+	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
 		return;
 	}
 
-	foreach( $my_custom_post_types as $key => $my_custom_post_type ) {
-		if ( $my_custom_post_type['slug'] == $screen->post_type ) {
+	foreach( $cpt_configs as $key => $cpt_config ) {
+		if ( $cpt_config['slug'] == $screen->post_type ) {
 
 			$help_content = load_help_content(
-				$my_custom_post_type['slug'],
-				$my_custom_post_type['singular_name']
+				$cpt_config['slug'],
+				$cpt_config['singular_name'],
+				$cpt_config['text_domain']
 			);
 
 			$config = array(
-				'id'      => $my_custom_post_type['slug'] . '-help',
-				'title'   => $my_custom_post_type['singular_name'] . ' Help',
+				'id'      => $cpt_config['slug'] . '-help',
+				'title'   => $cpt_config['singular_name'] . ' Help',
 				'content' => $help_content,
 			);
 
@@ -243,7 +219,7 @@ function add_help_text_to_custom_post_type() {
  *
  * @return 	string 	$help_content 	HTML and Text from help view
  */
-function load_help_content( $custom_post_type, $custom_post_type_name ) {
+function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain ) {
 
 		$help_content = '';
 

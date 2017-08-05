@@ -25,6 +25,7 @@ function autoload() {
 	$files = [
 		'custom/post-type.php',
 		'custom/taxonomy.php',
+		'custom/custom_configs.php',
 		'shortcode/shortcode.php',
 	];
 
@@ -44,6 +45,7 @@ register_activation_hook( COLLAPSIBLE_CONTENT_PLUGIN, __NAMESPACE__ . '\flush_mo
  */
 function flush_module_rewrite_rules() {
 	Custom\register_custom_post_types();
+	Custom\register_custom_taxonomy();
 	flush_rewrite_rules();
 }
 /**

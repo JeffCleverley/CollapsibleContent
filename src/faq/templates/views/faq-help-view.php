@@ -10,7 +10,6 @@
  *
  */
 
-$text_domain = FAQ_MODULE_TEXT_DOMAIN;
 $obj = get_post_type_object( $custom_post_type );
 $description = esc_html( $obj->description );
 $help_header_first_list = __('FAQ Help', $text_domain );
