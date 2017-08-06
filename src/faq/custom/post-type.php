@@ -20,8 +20,10 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
  * @return void
  */
 function register_custom_post_types() {
-	// Custom configs setting function in custom_configs.php
 	$cpt_configs = custom_post_type_configs();
+	if ( ! $cpt_configs ) {
+		return;
+	}
 
 	foreach ( $cpt_configs as $cpt_config ) {
 		$features = get_all_post_type_features( 'post', $cpt_config['excluded_features'] );
@@ -59,7 +61,6 @@ function register_custom_post_types() {
  * @return 	array
  */
 function post_type_label_config( $post_type, $singular_label, $plural_label, $text_domain) {
-
 	return [
 		'name'                  => _x( $plural_label, 'post type general name', $text_domain ),
 		'singular_name'      	=> _x( $singular_label, 'post type singular name', $text_domain ),
@@ -97,7 +98,6 @@ function post_type_label_config( $post_type, $singular_label, $plural_label, $te
  */
 function get_all_post_type_features( $post_type = 'post', $excluded_features = array() ) {
 	$configured_features = array_keys( get_all_post_type_supports( $post_type ) );
-
 	if ( ! $excluded_features ) {
 		return $configured_features;
 	}
@@ -119,9 +119,12 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  */
 function update_custom_post_type_messages( $messages ) {
 	$cpt_configs    =   custom_post_type_configs();
+	if ( ! $cpt_configs ) {
+		return $messages;
+	}
+
 	$post           =   get_post();
 	$post_type      =   get_post_type( $post );
-
 	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
 		return $messages;
 	}
@@ -179,10 +182,13 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
  * @return 	void
  */
 function add_help_text_to_custom_post_type() {
+	$cpt_configs =  custom_post_type_configs();
+	if ( ! $cpt_configs ) {
+		return;
+	}
 
 	$screen      =  get_current_screen();
 	$post_type   =  $screen->post_type;
-	$cpt_configs =  custom_post_type_configs();
 
 	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
 		return;

@@ -20,8 +20,10 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_taxonomy' );
  * @return  void
  */
 function register_custom_taxonomy() {
-	
 	$taxonomy_configs = custom_taxonomies_configs();
+	if ( ! $taxonomy_configs ) {
+		return;
+	}
 
 	foreach( $taxonomy_configs as $taxonomy_config ) {
 
@@ -41,7 +43,6 @@ function register_custom_taxonomy() {
 	};
 }
 function taxonomy_label_config( $taxonomy_config ) {
-
 	$text_domain = $taxonomy_config['text_domain'];
 	$plural_label = $taxonomy_config['plural_name'];
 	$singular_label = $taxonomy_config['singular_name'];
@@ -93,8 +94,10 @@ add_filter( 'genesis_post_meta', __NAMESPACE__ . '\filter_custom_taxonomies_to_g
  * @return  string              default with custom taxonomies concatenated on in shortcode form.
  */
 function filter_custom_taxonomies_to_genesis_footer_post_meta( $post_meta ) {
-
 	$taxonomy_configs = custom_taxonomies_configs();
+	if ( ! $taxonomy_configs ) {
+		return $post_meta;
+	}
 
 	foreach ( $taxonomy_configs as $taxonomy_config ) {
 		$text_domain = $taxonomy_config['text_domain'];

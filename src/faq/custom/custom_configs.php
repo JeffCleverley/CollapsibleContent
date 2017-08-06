@@ -12,7 +12,7 @@
 namespace  Deftly\Module\FAQ\Custom;
 /**
  * Configure Custom Post Types.
- * Enter an additional array for each new post type
+ * Enter an additional array within the return array for each new post type
  *
  * REMEMBER - also need to create a view file in /templates/views for each CPT's help tab content.
  *
@@ -43,7 +43,7 @@ function custom_post_type_configs() {
 }
 /**
  * Configure Custom Taxonomies.
- * Enter an additional array for each new taxonomy.
+ * Enter an additional array within the return array for each new taxonomy.
  *
  * @return array
  */
