@@ -18,7 +18,7 @@ $help_item1 = __('Make sure you concisely explain the question and give content 
 $help_item2 = __('Clearly explain your answer, try to imagine how a user reading your answer might interpret it. Give examples where needed. Consider saving the FAQ as a draft and coming back to it later.', $text_domain );
 $help_header_second_list = __('If you want to schedule the '. $custom_post_type_name . ' to be published in the future:', $text_domain );
 $help_item4 =  __('Under the Publish module, click on the Edit link next to Publish.', $text_domain );
-$help_item5 = __('Change the date to the date to actually publish the ' . $custom_post_type_name . ', then click on Ok.', $text_domain );
+$help_item5 = __("Change the date to the date to actually publish the {$custom_post_type_name}, then click on Ok.", $text_domain );
 $header_more_information = __('For more information:', $text_domain );
 $help_link = __('<a href="https//:github.com/JeffCleverley/CollapsibleContent" target="_blank">Collapsible Content Plugin Documentation</a>', $text_domain );
 

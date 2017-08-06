@@ -65,25 +65,25 @@ function post_type_label_config( $post_type, $singular_label, $plural_label, $te
 		'name'                  => _x( $plural_label, 'post type general name', $text_domain ),
 		'singular_name'      	=> _x( $singular_label, 'post type singular name', $text_domain ),
 		'name_admin_bar'     	=> _x( $singular_label, 'add new on admin bar', $text_domain ),
-		'add_new'            	=> _x( 'Add New ' . $singular_label, $post_type, $text_domain ),
-		'add_new_item'       	=> __( 'Add New ' . $singular_label, $text_domain ),
-		'new_item'           	=> __( 'New ' . $singular_label, $text_domain ),
-		'edit_item'          	=> __( 'Edit ' . $singular_label, $text_domain ),
-		'view_item'          	=> __( 'View ' . $singular_label, $text_domain ),
-		'view_items'          	=> __( 'View ' . $plural_label, $text_domain ),
-		'all_items'          	=> __( 'All ' . $plural_label, $text_domain ),
-		'archives'          	=> __( $singular_label . ' Archives', $text_domain ),
-		'attributes'          	=> __( $singular_label . ' Attributes', $text_domain ),
-		'insert_into_item'      => __( 'Insert in to ' . $singular_label, $text_domain ),
-		'uploaded_to_this_item' => __( 'Uploaded to this ' . $singular_label, $text_domain ),
-		'search_items'       	=> __( 'Search ' . $plural_label, $text_domain ),
-		'parent_item_colon'  	=> __( 'Parent ' .  $plural_label . ':', $text_domain ),
-		'not_found'          	=> __( 'No ' . $plural_label . ' found.', $text_domain ),
-		'not_found_in_trash' 	=> __( 'No ' . $plural_label . ' found in Trash.', $text_domain ),
-		'featured_image'        => __( $singular_label . ' Image', $text_domain ),
-		'set_featured_image'    => __( 'Set ' . $singular_label . ' Image', $text_domain ),
-		'remove_featured_image' => __( 'Remove ' . $singular_label . ' Image', $text_domain ),
-		'use_featured_image'    => __( 'Use ' . $singular_label . ' Image', $text_domain ),
+		'add_new'            	=> _x( "Add New {$singular_label}", $post_type, $text_domain ),
+		'add_new_item'       	=> __( "Add New {$singular_label}", $text_domain ),
+		'new_item'           	=> __( "New {$singular_label}", $text_domain ),
+		'edit_item'          	=> __( "Edit {$singular_label}", $text_domain ),
+		'view_item'          	=> __( "View {$singular_label}", $text_domain ),
+		'view_items'          	=> __( "View {$plural_label}", $text_domain ),
+		'all_items'          	=> __( "All {$plural_label}", $text_domain ),
+		'archives'          	=> __( "{$singular_label} Archives", $text_domain ),
+		'attributes'          	=> __( "{$singular_label} Attributes", $text_domain ),
+		'insert_into_item'      => __( "Insert in to {$singular_label}", $text_domain ),
+		'uploaded_to_this_item' => __( "Uploaded to this {$singular_label}", $text_domain ),
+		'search_items'       	=> __( "Search {$plural_label}", $text_domain ),
+		'parent_item_colon'  	=> __( "Parent {$plural_label}:", $text_domain ),
+		'not_found'          	=> __( "No {$plural_label} found.", $text_domain ),
+		'not_found_in_trash' 	=> __( "No {$plural_label} found in Trash.", $text_domain ),
+		'featured_image'        => __( "{$singular_label} Image", $text_domain ),
+		'set_featured_image'    => __( "Set {$singular_label} Image", $text_domain ),
+		'remove_featured_image' => __( "Remove {$singular_label} Image", $text_domain ),
+		'use_featured_image'    => __( "Use {$singular_label} Image", $text_domain ),
 	];
 }
 /**
@@ -137,32 +137,32 @@ function update_custom_post_type_messages( $messages ) {
 
 		$messages[ $post_type ] = [
 			0   =>  '', // Unused. Messages start at index 1.
-			1   =>   __( $post_type_name . ' updated.', $text_domain ),
+			1   =>   __( "{$post_type_name} updated.", $text_domain ),
 			2   =>  __( 'Custom field updated.', $text_domain ),
 			3   =>  __( 'Custom field deleted.', $text_domain ),
-			4   =>  __( $post_type_name . ' updated.', $text_domain ),
+			4   =>  __( "{$post_type_name} updated.", $text_domain ),
 			/* translators: %s: date and time of the revision */
-			5   =>  isset( $_GET['revision'] ) ? sprintf( __( $post_type_name . ' restored to revision from %s', $text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6   =>  __( $post_type_name . ' published.', $text_domain ),
-			7   =>  __( $post_type_name . ' saved.', $text_domain ),
-			8   =>  __( $post_type_name . ' submitted.', $text_domain ),
+			5   =>  isset( $_GET['revision'] ) ? sprintf( __( "{$post_type_name} restored to revision from %s", $text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6   =>  __( "{$post_type_name} published.", $text_domain ),
+			7   =>  __( "{$post_type_name} saved.", $text_domain ),
+			8   =>  __( "{$post_type_name} submitted.", $text_domain ),
 			9   =>  sprintf(
-					__( $post_type_name . ' scheduled for: <strong>%1$s</strong>.', $text_domain ),
+					__( "{$post_type_name} scheduled for: <strong>%1$s</strong>.", $text_domain ),
 					// translators: Publish box date format, see http://php.net/date
 					date_i18n( __( 'M j, Y @ G:i', $text_domain ), strtotime( $post->post_date ) )
 					),
-			10  =>  __( $post_type_name . ' draft updated.', $text_domain )
+			10  =>  __( "{$post_type_name} draft updated.", $text_domain )
 		];
 
 		if ( $post_type_object->publicly_queryable ) {
 			$permalink  =   get_permalink( $post->ID );
-			$view_link  =   sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( 'View ' . $post_type_name, $text_domain ) );
+			$view_link  =   sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( "View {$post_type_name}", $text_domain ) );
 			$messages[ $post_type ][1]  .=  $view_link;
 			$messages[ $post_type ][6]  .=  $view_link;
 			$messages[ $post_type ][9]  .=  $view_link;
 
 			$preview_permalink  =   add_query_arg( 'preview', 'true', $permalink );
-			$preview_link       =   sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( 'Preview ' . $post_type_name, $text_domain ) );
+			$preview_link       =   sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( "Preview {$post_type_name}", $text_domain ) );
 			$messages[ $post_type ][8]  .=  $preview_link;
 			$messages[ $post_type ][10] .=  $preview_link;
 		}
@@ -204,8 +204,8 @@ function add_help_text_to_custom_post_type() {
 			);
 
 			$config = array(
-				'id'      => $cpt_config['slug'] . '-help',
-				'title'   => $cpt_config['singular_name'] . ' Help',
+				'id'      => "{$cpt_config['slug']}-help",
+				'title'   => "{$cpt_config['singular_name']} Help",
 				'content' => $help_content,
 			);
 
@@ -229,7 +229,7 @@ function load_help_content( $custom_post_type, $custom_post_type_name, $text_dom
 
 		$help_content = '';
 
-		include( dirname( __FILE__ ) . '/../templates/views/' . $custom_post_type .'-help-view.php' );
+		include( dirname( __FILE__ ) . "/../templates/views/{$custom_post_type}-help-view.php" );
 
 		return $help_content;
 
