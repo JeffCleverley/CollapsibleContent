@@ -50,23 +50,23 @@ function taxonomy_label_config( $taxonomy_config ) {
 	$labels = [
 		'name'              => _x( $plural_label, 'taxonomy general name', $text_domain ),
 		'singular_name'     => _x( $singular_label, 'taxonomy singular name', $text_domain ),
-		'search_items'      => __( 'Search ' . $plural_label, $text_domain ),
-		'all_items'         => __( 'All' . $plural_label, $text_domain ),
-		'edit_item'         => __( 'Edit ' . $singular_label, $text_domain ),
-		'view_item'         => __( 'View ' . $singular_label, $text_domain ),
-		'update_item'       => __( 'Update ' . $singular_label, $text_domain ),
-		'add_new_item'      => __( 'Add New ' . $singular_label, $text_domain ),
-		'new_item_name'     => __( 'New ' . $singular_label . ' Name', $text_domain ),
-		'not_found'         => __( 'No ' .  $plural_label . ' found.', $text_domain ),
+		'search_items'      => __( "Search {$plural_label}", $text_domain ),
+		'all_items'         => __( "All {$plural_label}", $text_domain ),
+		'edit_item'         => __( "Edit {$singular_label}", $text_domain ),
+		'view_item'         => __( "View {$singular_label}", $text_domain ),
+		'update_item'       => __( "Update {$singular_label}", $text_domain ),
+		'add_new_item'      => __( "Add New {$singular_label}", $text_domain ),
+		'new_item_name'     => __( "New {$singular_label} Name", $text_domain ),
+		'not_found'         => __( "No {$plural_label} found.", $text_domain ),
 	];
 
 	if ( $taxonomy_config['hierarchical'] == false ) {
 
 		$non_hierarchical_labels = array(
-			'popular_items'                 =>  __( 'Most popular ' . $plural_label, $text_domain ),
-			'separate_items_with_commas'    =>  __( 'Separate ' . $plural_label . ' with commas', $text_domain ),
-			'add_or_remove_items'           =>  __( 'Add or remove ' . $plural_label, $text_domain ),
-			'choose_from_most_used'         =>  __( 'Choose from the most used ' . $plural_label, $text_domain ),
+			'popular_items'                 =>  __( "Most popular {$plural_label}", $text_domain ),
+			'separate_items_with_commas'    =>  __( "Separate {$plural_label} with commas", $text_domain ),
+			'add_or_remove_items'           =>  __( "Add or remove {$plural_label}", $text_domain ),
+			'choose_from_most_used'         =>  __( "Choose from the most used {$plural_label}", $text_domain ),
 		);
 
 		$non_hierarchical_labels = array_merge( $labels, $non_hierarchical_labels );
@@ -74,8 +74,8 @@ function taxonomy_label_config( $taxonomy_config ) {
 	}
 
 	$hierarchical_labels = array(
-		'parent_item'       =>  __( 'Parent ' . $singular_label, $text_domain),
-		'parent_item_colon' =>  __( 'Parent ' . $singular_label . ':', $text_domain),
+		'parent_item'       =>  __( "Parent {$singular_label}", $text_domain),
+		'parent_item_colon' =>  __( "Parent {$singular_label}: ", $text_domain),
 	);
 
 	$hierarchical_labels = array_merge( $labels, $hierarchical_labels );
@@ -102,8 +102,8 @@ function filter_custom_taxonomies_to_genesis_footer_post_meta( $post_meta ) {
 	foreach ( $taxonomy_configs as $taxonomy_config ) {
 		$text_domain = $taxonomy_config['text_domain'];
 		$post_meta .= sprintf(
-			' [post_terms taxonomy="' . $taxonomy_config['slug'] . '" before="%s" after="<br />"]',
-			__( $taxonomy_config['singular_name'] . ': ', $text_domain )
+			"[post_terms taxonomy=\"{$taxonomy_config['slug']}\" before=\"%s\" after=\"<br />\"]",
+			__( "{$taxonomy_config['singular_name']}: ", $text_domain )
 		);
 	}
 	return $post_meta;
