@@ -37,7 +37,7 @@ autoload();
 
 register_activation_hook( COLLAPSIBLE_CONTENT_PLUGIN, __NAMESPACE__ . '\flush_module_rewrite_rules');
 /**
- * Initialize the rewrites for the new custom post type upon module activation
+ * Initialize the rewrites for the new custom post type upon module activation.
  *
  * @since   0.0.1
  *
@@ -48,14 +48,29 @@ function flush_module_rewrite_rules() {
 	Custom\register_custom_taxonomy();
 	flush_rewrite_rules();
 }
+
+register_deactivation_hook( COLLAPSIBLE_CONTENT_PLUGIN, __NAMESPACE__ . '\delete_module_rewrite_rules');
 /**
- * Flush the rewrites for the new custom post type upon module deactivation
+ * Cleanup
+ * Flush the rewrites for the new custom post type upon module deactivation.
  *
  * @since   0.0.1
  *
  * @return  void
  */
-register_deactivation_hook( COLLAPSIBLE_CONTENT_PLUGIN, __NAMESPACE__ . '\delete_module_rewrite_rules');
 function delete_module_rewrite_rules() {
+	delete_option( 'rewrite_rules' );
+}
+
+register_uninstall_hook( COLLAPSIBLE_CONTENT_PLUGIN, __NAMESPACE__ . '\uninstall_module');
+/**
+ * Cleanup
+ * Flush the rewrites for the new custom post type upon module uninstall.
+ *
+ * @since   0.0.1
+ *
+ * @return  void
+ */
+function uninstall_module() {
 	delete_option( 'rewrite_rules' );
 }
