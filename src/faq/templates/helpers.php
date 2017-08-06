@@ -17,7 +17,7 @@ add_filter( 'archive_template', __NAMESPACE__ . '\load_the_faq_archive_template'
  * Load the new Custom Post Type archives from the plugin.
  * Use configs from Custom\custom_post_type_configs().
  *
- * REMEMBER to make /arhive-{slug}.php templates for each CPT.
+ * REMEMBER to make /archive-{slug}.php templates for each CPT.
  *
  * @since   0.0.1
  *
@@ -44,4 +44,80 @@ function load_the_faq_archive_template( $archive_template ) {
 
 		return $archive_template;
 	}
+}
+/**
+ * Gets all of the posts grouped by terms for the specified
+ * post type and taxonomy.
+ *
+ * Results are grouped by terms and ordered by the term and post IDs.
+ *
+ * @since 1.0.0
+ *
+ * @param string $post_type_name Post type to limit query to
+ * @param string $taxonomy_name Taxonomy to limit query to
+ *
+ * @return array|false
+ */
+function get_posts_grouped_by_term( $post_type_name, $taxonomy_name ) {
+	$records = get_posts_grouped_by_term_from_db( $post_type_name, $taxonomy_name );
+
+	$groupings = array();
+	foreach ( $records as $record ) {
+		$term_id = (int) $record->term_id;
+		$post_id = (int) $record->post_id;
+
+		if ( ! array_key_exists( $term_id, $groupings ) ) {
+			$groupings[ $term_id ] = array(
+				'term_id'   => $term_id,
+				'term_name' => $record->term_name,
+				'term_slug' => $record->term_slug,
+				'posts'     => array(),
+			);
+		}
+
+		$groupings[ $term_id ]['posts'][ $post_id ] = array(
+			'post_id'      => $post_id,
+			'post_title'   => $record->post_title,
+			'post_content' => $record->post_content,
+		);
+	}
+
+	return $groupings;
+}
+
+/**
+ * Gets all of the posts grouped by terms for the specified
+ * post type and taxonomy.
+ *
+ * Results are grouped by terms and ordered by the term and post IDs.
+ *
+ * @since 1.0.0
+ *
+ * @param string $post_type_name Post type to limit query to
+ * @param string $taxonomy_name Taxonomy to limit query to
+ *
+ * @return array|false
+ */
+function get_posts_grouped_by_term_from_db( $post_type_name, $taxonomy_name ) {
+	global $wpdb;
+
+	$sql_query = "
+		SELECT t.term_id, t.name AS term_name, t.slug AS term_slug, p.ID AS post_id, p.post_title, p.post_content
+		FROM {$wpdb->term_taxonomy} AS tt
+		INNER JOIN {$wpdb->terms} AS t ON (tt.term_id = t.term_id)
+		INNER JOIN {$wpdb->term_relationships} AS tr ON (tt.term_taxonomy_id = tr.term_taxonomy_id)
+		INNER JOIN {$wpdb->posts} AS p ON (tr.object_id = p.ID)
+		WHERE p.post_status = 'publish' AND p.post_type = %s AND tt.taxonomy = %s
+		GROUP BY t.term_id, p.ID
+		ORDER BY t.term_id, p.ID ASC;
+		";
+
+	$sql_query = $wpdb->prepare( $sql_query, $post_type_name, $taxonomy_name );
+
+	$results = $wpdb->get_results( $sql_query );
+	if ( ! $results || ! is_array( $results ) ) {
+		return false;
+	}
+
+	return $results;
 }
