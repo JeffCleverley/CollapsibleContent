@@ -10,3 +10,6 @@
  *
  */
 namespace  Deftly\Module\FAQ\Template;
+
+ddd( 'plugin archive' );
+

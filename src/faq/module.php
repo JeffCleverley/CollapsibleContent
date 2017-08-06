@@ -27,6 +27,7 @@ function autoload() {
 		'custom/taxonomy.php',
 		'custom/custom_configs.php',
 		'shortcode/shortcode.php',
+		'templates/helpers.php',
 	];
 
 	foreach( $files as $file ) {
