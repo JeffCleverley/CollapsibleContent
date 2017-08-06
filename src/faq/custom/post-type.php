@@ -26,11 +26,17 @@ function register_custom_post_types() {
 	}
 
 	foreach ( $cpt_configs as $cpt_config ) {
-		$features = get_all_post_type_features( 'post', $cpt_config['excluded_features'] );
+
+		$post_or_page = 'post';
 
 		if ( $cpt_config['hierarchical'] == true ) {
-			$hierarchical_feature = ['page-attributes'];
-			$features =  array_merge( $features, $hierarchical_feature );
+			$post_or_page = 'page';
+		}
+
+		$features = get_all_post_type_features( $post_or_page, $cpt_config['excluded_features'] );
+
+		if (  ! $cpt_config['hierarchical']  && $cpt_config['page_attributes'] ) {
+			$features[] = 'page-attributes';
 		}
 
 		$labels = post_type_label_config(
@@ -153,7 +159,7 @@ function update_custom_post_type_messages( $messages ) {
 			7   =>  __( "{$post_type_name} saved.", $text_domain ),
 			8   =>  __( "{$post_type_name} submitted.", $text_domain ),
 			9   =>  sprintf(
-					__( "{$post_type_name} scheduled for: <strong>%1$s</strong>.", $text_domain ),
+					__( $post_type_name . ' scheduled for: <strong>%1$s</strong>.', $text_domain ),
 					// translators: Publish box date format, see http://php.net/date
 					date_i18n( __( 'M j, Y @ G:i', $text_domain ), strtotime( $post->post_date ) )
 					),

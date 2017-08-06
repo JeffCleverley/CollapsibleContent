@@ -79,6 +79,7 @@ function get_posts_grouped_by_term( $post_type_name, $taxonomy_name ) {
 			'post_id'      => $post_id,
 			'post_title'   => $record->post_title,
 			'post_content' => $record->post_content,
+			'menu_order' => $record->menu_order,
 		);
 	}
 
@@ -102,14 +103,14 @@ function get_posts_grouped_by_term_from_db( $post_type_name, $taxonomy_name ) {
 	global $wpdb;
 
 	$sql_query = "
-		SELECT t.term_id, t.name AS term_name, t.slug AS term_slug, p.ID AS post_id, p.post_title, p.post_content
+		SELECT t.term_id, t.name AS term_name, t.slug AS term_slug, p.ID AS post_id, p.post_title, p.post_content, p.menu_order
 		FROM {$wpdb->term_taxonomy} AS tt
 		INNER JOIN {$wpdb->terms} AS t ON (tt.term_id = t.term_id)
 		INNER JOIN {$wpdb->term_relationships} AS tr ON (tt.term_taxonomy_id = tr.term_taxonomy_id)
 		INNER JOIN {$wpdb->posts} AS p ON (tr.object_id = p.ID)
 		WHERE p.post_status = 'publish' AND p.post_type = %s AND tt.taxonomy = %s
 		GROUP BY t.term_id, p.ID
-		ORDER BY t.term_id, p.ID ASC;
+		ORDER BY t.name, p.menu_order ASC;
 		";
 
 	$sql_query = $wpdb->prepare( $sql_query, $post_type_name, $taxonomy_name );

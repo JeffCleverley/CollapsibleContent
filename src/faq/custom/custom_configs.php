@@ -27,7 +27,10 @@ function custom_post_type_configs() {
 			'icon'                  => 'dashicons-editor-help',
 			'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 			'public'                => true,
+			// Hierarchical = 'page' with parent and order attribute. When true 'page_attribute' below is automatically true.
 			'hierarchical' 		    => false,
+			// If you want order attribute but no parent set page_attributes to true below and hierarchical to false above.
+			'page_attributes' 		=> true,
 			'has_archive'  		    => true,
 			'menu_position'		    => 5,
 			'show_in_rest'          => false,
@@ -37,6 +40,7 @@ function custom_post_type_configs() {
 				'comments',
 				'trackbacks',
 				'custom-fields',
+				'thumbnail',
 			)
 		],
 	);
