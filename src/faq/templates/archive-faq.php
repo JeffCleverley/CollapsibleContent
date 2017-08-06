@@ -28,6 +28,11 @@ function do_faq_archive_loop() {
 		echo '<p>Sorry, there are no FAQs</p>';
 	}
 
+	$attributes = array(
+		'show_icon' =>  'dashicons dashicons-plus',
+		'hide_icon' =>  'dashicons dashicons-minus',
+	);
+
 	foreach ( $records as $key => $record ) {
 		include( __DIR__ . '/views/container.php' );
 	}
@@ -35,8 +40,8 @@ function do_faq_archive_loop() {
 
 function loop_and_render_faqs( array $faqs ) {
 	$attributes = array(
-		'show_icon' =>  'dashicons dashicons-arrow-down-alt2 show-icon',
-		'hide_icon' =>  'dashicons dashicons-arrow-up-alt2 hide-icon',
+		'show_icon' =>  'dashicons dashicons-editor-help',
+		'hide_icon' =>  'dashicons dashicons-lightbulb',
 	);
 
 	foreach ( $faqs as $faq ) {

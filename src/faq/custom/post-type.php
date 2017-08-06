@@ -27,6 +27,12 @@ function register_custom_post_types() {
 
 	foreach ( $cpt_configs as $cpt_config ) {
 		$features = get_all_post_type_features( 'post', $cpt_config['excluded_features'] );
+
+		if ( $cpt_config['hierarchical'] == true ) {
+			$hierarchical_feature = ['page-attributes'];
+			$features =  array_merge( $features, $hierarchical_feature );
+		}
+
 		$labels = post_type_label_config(
 			$cpt_config['slug'],
 			$cpt_config['singular_name'],
