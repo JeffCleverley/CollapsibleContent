@@ -10,6 +10,9 @@ This plugin includes the following features:
 
 - QA Shortcode, `[qa]`
 - Teaser Shortcode, `[teaser]`
+- FAQ Shortcode
+- FAQ Custom Post Type
+- Topics Custom Taxonomy
 - Font icon visual indicator
 - jQuery sliding animation
 
