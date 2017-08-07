@@ -60,10 +60,13 @@ function render_single_faq( array $attributes, array $config ) {
 	if ( ! $faq ) {
 		return render_none_found_message( $attributes );
 	}
-	$post_title = $faq->post_title;
-	$hidden_content = do_shortcode( $faq->post_content );
 
-	include( $config['views']['container_single'] );
+	$is_calling_source  = 'shortcode-single-faq';
+	$use_term_container = false;
+	$post_title         = $faq->post_title;
+	$hidden_content     = do_shortcode( $faq->post_content );
+
+	include( $config['views']['container'] );
 
 }
 
@@ -101,7 +104,11 @@ function render_topic_faqs( array $attributes, array $config ) {
 		return render_none_found_message( $attributes, false );
 	endif;
 
-	include( $config['views']['container_topic'] );
+	$is_calling_source  = 'shortcode-by-topic';
+	$use_term_container = true;
+	$term_slug = $attributes['topic_slug'];
+
+	include( $config['views']['container'] );
 
 	wp_reset_postdata();
 }
@@ -162,9 +169,8 @@ function render_none_found_message( array $attributes, $is_single_faq = true ) {
 function get_shortcode_configuration() {
 	return array(
 		'views'     =>  [
-			'container_single'  =>  __DIR__ . '/views/container-single.php',
-			'container_topic'   =>  __DIR__ . '/views/container-topic.php',
-			'faq'               =>  __DIR__ . '/views/faq.php',x
+			'container' =>  FAQ_MODULE_DIR . '/views/container.php',
+			'faq'       =>  FAQ_MODULE_DIR . '/views/faq.php',
 		],
 		'defaults'  =>  [
 			'show_icon'                 =>  'dashicons dashicons-arrow-down-alt2 show-icon',

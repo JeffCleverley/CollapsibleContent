@@ -11,12 +11,14 @@
  */
 namespace  Deftly\Module\FAQ\Templates;
 
-use function Composer\Autoload\includeFile;
-
 remove_action( 'genesis_loop', 'genesis_do_loop' );
 add_action( 'genesis_loop', __NAMESPACE__ . '\do_faq_archive_loop');
+
 /**
  * Do the FAQ Archive Loop and render out the HTML by loading appropriate view.
+ *
+ * NOTE: The variables are set to call the correct
+ * HTML markup in the container.php view file
  *
  * @since 0.0.1
  *
@@ -33,11 +35,26 @@ function do_faq_archive_loop() {
 		'hide_icon' =>  'dashicons dashicons-minus',
 	);
 
+	$use_term_container = true;
+	$show_term_name = true;
+	$is_calling_source = 'template';
+
+
 	foreach ( $records as $key => $record ) {
-		include( __DIR__ . '/views/container.php' );
+		$term_slug = $record['term_slug'];
+		include( FAQ_MODULE_DIR . '/views/container.php' );
 	}
 }
 
+/**
+ * Loop through and render out the FAQs.
+ *
+ * @since   0.0.1
+ *
+ * @param   array $faqs
+ *
+ * @return  voic
+ */
 function loop_and_render_faqs( array $faqs ) {
 	$attributes = array(
 		'show_icon' =>  'dashicons dashicons-editor-help',
@@ -45,9 +62,10 @@ function loop_and_render_faqs( array $faqs ) {
 	);
 
 	foreach ( $faqs as $faq ) {
-		$hidden_content =  do_shortcode( $faq['post_content'] );
+		$hidden_content = do_shortcode( $faq['post_content'] );
+		$post_title     = $faq['post_title'];
 
-		include( __DIR__ . '/views/faq.php' );
+		include( FAQ_MODULE_DIR . '/views/faq.php' );
 	}
 }
 
