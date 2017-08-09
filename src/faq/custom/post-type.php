@@ -26,33 +26,27 @@ function register_custom_post_types() {
 	}
 
 	foreach ( $user_cpt_configs as $user_cpt_config ) {
-		$defaults_linked_to_public = process_defaults_linked_to_public( $user_cpt_config );
-		$user_cpt_config = array_replace( $user_cpt_config, $defaults_linked_to_public );
 
 		$post_or_page = 'post';
-		if ( $user_cpt_config['hierarchical'] == true ) {
+		if ( $user_cpt_config['args']['hierarchical'] == true ) {
 			$post_or_page = 'page';
 		}
 
 		$features = get_all_post_type_features( $post_or_page, $user_cpt_config['excluded_features'] );
-		if (  ! $user_cpt_config['hierarchical']  && $user_cpt_config['page_attributes'] ) {
+		if (  ! $user_cpt_config['args']['hierarchical']  && $user_cpt_config['args']['page_attributes'] ) {
 			$features[] = 'page-attributes';
 		}
 
-		$labels = post_type_label_config(
-			$user_cpt_config['slug'],
-			$user_cpt_config['singular_name'],
-			$user_cpt_config['plural_name'],
-			$user_cpt_config['text_domain']
-		);
+		$labels = post_type_label_config( $user_cpt_config['labels'] );
 
 		$args = [
-			'labels'       		    => $labels,
-			'supports'     		    => $features,
+			'labels'    => $labels,
+			'supports'  => $features,
 		];
 
-		$processed_args = process_args_to_check_for_nulls( $args, $user_cpt_config );
-		register_post_type( $user_cpt_config['slug'], $processed_args );
+		$args = array_merge( $args, $user_cpt_config['args'] );
+
+		register_post_type( $user_cpt_config['labels']['slug'], $args );
 	}
 }
 /**
@@ -60,14 +54,17 @@ function register_custom_post_types() {
  *
  * @since 	0.0.1
  *
- * @param   string  $post_type      provided by register_custom_post_types() from custom_configs.php
- * @param   string  $singular_label provided by register_custom_post_types() from custom_configs.php
- * @param   string  $plural_label   provided by register_custom_post_types() from custom_configs.php
- * @param   string  $text_domain   provided by register_custom_post_types() from custom_configs.php
+ * @param   array  $labels      provided by register_custom_post_types() from custom_configs.php
  *
  * @return 	array
  */
-function post_type_label_config( $post_type, $singular_label, $plural_label, $text_domain) {
+function post_type_label_config( $labels ) {
+
+	$plural_label   = $labels['plural_name'];
+	$singular_label = $labels['singular_name'];
+	$post_type      = $labels['slug'];
+	$text_domain    = $labels['text_domain'];
+
 	return [
 		'name'                  => _x( $plural_label, 'post type general name', $text_domain ),
 		'singular_name'      	=> _x( $singular_label, 'post type singular name', $text_domain ),
@@ -240,77 +237,4 @@ function load_help_content( $custom_post_type, $custom_post_type_name, $text_dom
 		return $help_content;
 }
 
-/**
- * Process custom_post_type defaults linked to 'public' key value
- * Includes a foreach look so removed to it's own function to stop nesting.
- *
- * @since   0.0.1
- *
- * @param   array   $user_cpt_config    user-submitted post_type configurations
- *
- * @return  array   $defaults_linked_to_public
- */
-function process_defaults_linked_to_public( $user_cpt_config ) {
-	$defaults_linked_to_public = array(
-		'publicly_queryable'    =>  $user_cpt_config['publicly_queryable'],
-		'show_ui'               =>  $user_cpt_config['show_ui'],
-		'show_in_nav_menus'     =>  $user_cpt_config['show_in_nav_menus'],
-		'show_in_menu'          =>  $user_cpt_config['show_in_menu'],
-		'show_in_admin_bar'     =>  $user_cpt_config['show_in_admin_bar'],
-		'exclude_from_search'   =>  $user_cpt_config['exclude_from_search'],
-	);
 
-	foreach ($defaults_linked_to_public as  $key => $default_linked_to_public ) {
-		if ( $default_linked_to_public === true || $default_linked_to_public === false ) {
-			$defaults_linked_to_public[$key] = $defaults_linked_to_public[$key];
-		}
-	}
-
-	return $defaults_linked_to_public;
-}
-
-/**
- * Process Arguments to register post type - removes null arguments to maintain defaults
- * if user didn't specify key=>value in config.
- *
- * Removed to separate function to prevent nested foreach loops.
- *
- * @since   0.0.1
- *
- * @param   array   $args               Already set $args to be added to with any user set $args
- * @param   array   $user_cpt_config    Config array containing user set args and null values.
- *
- * @return  array   $args
- */
-function process_args_to_check_for_nulls( $args, $user_cpt_config ) {
-	$args_to_check_for_nulls = [
-		'public'                => $user_cpt_config['public'],
-		'description'           => $user_cpt_config['description'],
-		'menu_icon'    		    => $user_cpt_config['icon'],
-		'hierarchical' 		    => $user_cpt_config['hierarchical'],
-		'has_archive'  		    => $user_cpt_config['has_archive'],
-		'menu_position'		    => $user_cpt_config['menu_position'],
-		'show_in_rest'          => $user_cpt_config['show_in_rest'],
-		'exclude_from_search'   => $user_cpt_config['exclude_from_search'],
-		'publicly_queryable'    => $user_cpt_config['publicly_queryable'],
-		'show_ui'               => $user_cpt_config['show_ui'],
-		'show_in_nav_menus'     => $user_cpt_config['show_in_nav_menus'],
-		'show_in_menu'          => $user_cpt_config['show_in_menu'],
-		'show_in_admin_bar'     => $user_cpt_config['show_in_admin_bar'],
-		'register_meta_box_cb'  => $user_cpt_config['register_meta_box_cb'],
-		'taxonomies'            => $user_cpt_config['taxonomies'],
-		'rewrite'               => $user_cpt_config['rewrite'],
-		'query_var'             => $user_cpt_config['query_var'],
-		'can_export'            => $user_cpt_config['can_export'],
-		'delete_with_user'      => $user_cpt_config['delete_with_user'],
-		'rest_base'             => $user_cpt_config['rest_base'],
-	];
-
-	foreach ( $args_to_check_for_nulls as $key => $args_to_check_for_null ) {
-		if ( $args_to_check_for_null !== null ) {
-			$args[$key] = $args_to_check_for_null;
-		}
-	}
-
-	return $args;
-}

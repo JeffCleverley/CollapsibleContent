@@ -20,17 +20,22 @@ namespace  Deftly\Module\FAQ\Custom;
  */
 function custom_post_type_configs() {
 	return array(
-		[
-			'slug'                  => 'faq',
-			'singular_name'         => 'FAQ',
-			'plural_name'           => 'FAQs',
-			'icon'                  => 'dashicons-editor-help',
-			'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
-			'public'                => true,
-			'page_attributes' 		=> true,
-			'has_archive'  		    => true,
-			'menu_position'		    => 5,
-			'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+		[ // Beginning of one post type config.
+			'labels'                => array(
+				'slug'                  => 'faq',
+				'singular_name'         => 'FAQ',
+				'plural_name'           => 'FAQs',
+				'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+			),
+			'args'                  => array(
+				'icon'                  => 'dashicons-editor-help',
+				'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
+				'public'                => true,
+				'publicly_queryable'    => false,
+				'page_attributes' 		=> true,
+				'has_archive'  		    => true,
+				'menu_position'		    => 5,
+			),
 			'excluded_features'     => array(
 				'excerpt',
 				'comments',
@@ -38,7 +43,7 @@ function custom_post_type_configs() {
 				'custom-fields',
 				'thumbnail',
 			)
-		],
+		], // End of one post type config.
 	);
 }
 /**
