@@ -21,14 +21,14 @@ namespace  Deftly\Module\FAQ\Custom;
 function custom_post_type_configs() {
 	return array(
 		[ // Beginning of one post type config.
-			'labels'                => array(
-				'slug'                  => 'faq',
+			'labels'            => array(
 				'singular_name'         => 'FAQ',
+				'slug'                  => 'faq',
 				'plural_name'           => 'FAQs',
 				'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
 			),
-			'args'                  => array(
-				'icon'                  => 'dashicons-editor-help',
+			'args'              => array(
+				'menu_icon'             => 'dashicons-editor-help',
 				'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 				'public'                => true,
 				'publicly_queryable'    => false,
@@ -36,7 +36,31 @@ function custom_post_type_configs() {
 				'has_archive'  		    => true,
 				'menu_position'		    => 5,
 			),
-			'excluded_features'     => array(
+			'excluded_features' => array(
+				'excerpt',
+				'comments',
+				'trackbacks',
+				'custom-fields',
+				'thumbnail',
+			)
+		], // End of one post type config.
+		[ // Beginning of one post type config.
+			'labels'            => array(
+				'singular_name'         => 'Test',
+				'slug'                  => 'test',
+				'plural_name'           => 'Tests',
+				'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+			),
+			'args'              => array(
+				'menu_icon'                  => 'dashicons-editor-help',
+				'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
+				'public'                => true,
+				'publicly_queryable'    => false,
+				'page_attributes' 		=> true,
+				'has_archive'  		    => true,
+				'menu_position'		    => 5,
+			),
+			'excluded_features' => array(
 				'excerpt',
 				'comments',
 				'trackbacks',
@@ -54,19 +78,23 @@ function custom_post_type_configs() {
  */
 function custom_taxonomies_configs() {
 	return array(
-		[
-			'slug'                  => 'topic',
-			'singular_name'         => 'Topic',
-			'plural_name'           => 'Topics',
-			'public'                => true,
-			'hierarchical'          => true,
-			'show_in_quick_edit'    => true,
-			'show_admin_column'     => true,
-			'show_in_rest'          => false,
-			'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
-			'post_types'            => array(
+		[ // Beginning of one taxonomy config.
+			'labels'        => array(
+				'slug'                  => 'topic',
+				'singular_name'         => 'Topic',
+				'plural_name'           => 'Topics',
+				'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+			),
+			'args'          => array(
+				'public'                => true,
+				'hierarchical'          => true,
+				'show_in_quick_edit'    => true,
+				'show_admin_column'     => true,
+				'show_in_rest'          => false,
+			),
+			'post_types'    => array(
 				'faq',
 			)
-		],
+		], // End of one taxonomy config.
 	);
 }

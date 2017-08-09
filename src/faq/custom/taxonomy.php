@@ -26,17 +26,11 @@ function register_custom_taxonomy() {
 	}
 
 	foreach( $taxonomy_configs as $taxonomy_config ) {
-
-		$labels = taxonomy_label_config( $taxonomy_config );
-
+		$labels = taxonomy_label_config( $taxonomy_config['labels'] );
 		$args = array(
 			'labels'                => $labels,
-			'public'                => $taxonomy_config['public'],
-			'hierarchical'          => $taxonomy_config['hierarchical'],
-			'show_in_quick_edit'    => $taxonomy_config['show_in_quick_edit'],
-			'show_admin_column'     => $taxonomy_config['show_admin_column'],
-			'show_in_rest'          => $taxonomy_config['show_in_rest'],
 		);
+		$args = array_merge( $args, $taxonomy_config['args'] );
 
 		register_taxonomy( $taxonomy_config['slug'], $taxonomy_config['post_types'], $args );
 
@@ -60,8 +54,7 @@ function taxonomy_label_config( $taxonomy_config ) {
 		'not_found'         => __( "No {$plural_label} found.", $text_domain ),
 	];
 
-	if ( $taxonomy_config['hierarchical'] == false ) {
-
+	if ( $taxonomy_config['hierarchical'] === false ) {
 		$non_hierarchical_labels = array(
 			'popular_items'                 =>  __( "Most popular {$plural_label}", $text_domain ),
 			'separate_items_with_commas'    =>  __( "Separate {$plural_label} with commas", $text_domain ),
@@ -100,10 +93,10 @@ function filter_custom_taxonomies_to_genesis_footer_post_meta( $post_meta ) {
 	}
 
 	foreach ( $taxonomy_configs as $taxonomy_config ) {
-		$text_domain = $taxonomy_config['text_domain'];
+		$text_domain = $taxonomy_config['labels']['text_domain'];
 		$post_meta .= sprintf(
-			"[post_terms taxonomy=\"{$taxonomy_config['slug']}\" before=\"%s\" after=\"<br />\"]",
-			__( "{$taxonomy_config['singular_name']}: ", $text_domain )
+			"[post_terms taxonomy=\"{$taxonomy_config['labels']['slug']}\" before=\"%s\" after=\"<br />\"]",
+			__( "{$taxonomy_config['labels']['singular_name']}: ", $text_domain )
 		);
 	}
 	return $post_meta;

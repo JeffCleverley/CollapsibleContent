@@ -122,14 +122,17 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  * @return 	array 	$messages   Amended post update messages with new CPT update messages.
  */
 function update_custom_post_type_messages( $messages ) {
-	$user_cpt_configs    =   custom_post_type_configs();
+	$user_cpt_configs = custom_post_type_configs();
 	if ( ! $user_cpt_configs ) {
 		return $messages;
 	}
 
-	$post           =   get_post();
-	$post_type      =   get_post_type( $post );
-	if ( ! in_array( $post_type, array_column( $user_cpt_configs, 'slug' ) ) ) {
+	$post       = get_post();
+	$post_type  = get_post_type( $post );
+	foreach ($user_cpt_configs as $user_cpt_config) {
+		$slug_array[] = $user_cpt_config['labels']['slug'];
+	}
+	if ( ! in_array( $post_type, $slug_array ) ) {
 		return $messages;
 	}
 
@@ -137,7 +140,7 @@ function update_custom_post_type_messages( $messages ) {
 		$post_type_object   =   get_post_type_object( $post_type );
 		$post_type_labels   =   $post_type_object->labels;
 		$post_type_name     =   $post_type_labels->singular_name;
-		$text_domain        =   $user_cpt_config['text_domain'];
+		$text_domain        =   $user_cpt_config['labels']['text_domain'];
 
 		$messages[ $post_type ] = [
 			0   =>  '', // Unused. Messages start at index 1.
@@ -187,33 +190,34 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
  * @return 	void
  */
 function add_help_text_to_custom_post_type() {
-	$user_cpt_configs =  custom_post_type_configs();
+	$user_cpt_configs = custom_post_type_configs();
 	if ( ! $user_cpt_configs ) {
 		return;
 	}
 
-	$screen      =  get_current_screen();
-	$post_type   =  $screen->post_type;
+	$screen     = get_current_screen();
+	$post_type  = $screen->post_type;
 
-	if ( ! in_array( $post_type, array_column( $user_cpt_configs, 'slug' ) ) ) {
+	foreach ($user_cpt_configs as $user_cpt_config) {
+		$slug_array[] = $user_cpt_config['labels']['slug'];
+	}
+	if ( ! in_array( $post_type, $slug_array ) ) {
 		return;
 	}
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
-		if ( $user_cpt_config['slug'] == $screen->post_type ) {
-
+		if ( $user_cpt_config['labels']['slug'] == $screen->post_type ) {
 			$help_content = load_help_content(
-				$user_cpt_config['slug'],
-				$user_cpt_config['singular_name'],
-				$user_cpt_config['text_domain']
+				$user_cpt_config['labels']['slug'],
+				$user_cpt_config['labels']['singular_name'],
+				$user_cpt_config['labels']['text_domain']
 			);
 
 			$config = array(
-				'id'      => "{$user_cpt_config['slug']}-help",
-				'title'   => "{$user_cpt_config['singular_name']} Help",
+				'id'      => "{$user_cpt_config['labels']['slug']}-help",
+				'title'   => "{$user_cpt_config['labels']['singular_name']} Help",
 				'content' => $help_content,
 			);
-
 			$screen->add_help_tab( $config );
 		}
 	}
@@ -225,16 +229,37 @@ function add_help_text_to_custom_post_type() {
  *
  * @param   string  $custom_post_type       The custom post type slug from the add_help_text_to_custom_post_type() above.
  * @param   string  $custom_post_type_name  The custom post type singular name from the add_help_text_to_custom_post_type() above.
+ * @parem   string  $text_domain            Text domain for internationalisation.
  *
  * @since 	0.0.1
  *
  * @return 	string 	$help_content 	HTML and Text from help view
  */
 function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain ) {
-		$help_content = '';
-		include( dirname( __FILE__ ) . "/../templates/views/{$custom_post_type}-help-view.php" );
 
-		return $help_content;
+	$obj = get_post_type_object( $custom_post_type );
+	$description = esc_html( $obj->description );
+	$help_top_header = __("{$custom_post_type_name} Help", $text_domain );
+	$help_item_description = __( $description, $text_domain );
+	$help_paragraph_1 = /** @lang text */
+		<<<EOD
+		Make sure you concisely explain the question and give content to why it might cause a problem for someone, if possible.</br>
+		Clearly explain your answer, try to imagine how a user reading your answer might interpret it. Give examples where needed.
+EOD;
+	$help_paragraph_1 = __( $help_paragraph_1, $text_domain );
+	$help_middle_header = __("If you want to schedule the {$custom_post_type_name} to be published in the future:", $text_domain );
+	$help_paragraph_2 = /** @lang text */
+		<<<EOD
+		Under the Publish module, click on the Edit link next to Publish.</br>
+		Change the date to the date to actually publish the {$custom_post_type_name}, then click on Ok.
+EOD;
+	$help_paragraph_2 = __( $help_paragraph_2, $text_domain );
+	$header_more_information = __('For more information:', $text_domain );
+	$help_link = __('<a href="https//:github.com/JeffCleverley/CollapsibleContent" target="_blank">Collapsible Content Plugin Documentation</a>', $text_domain );
+
+	ob_start();
+	include( dirname( __FILE__ ) . "/../templates/views/{$custom_post_type}-help-view.php" );
+	return ob_get_clean();
 }
 
 
