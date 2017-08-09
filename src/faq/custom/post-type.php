@@ -20,44 +20,89 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
  * @return void
  */
 function register_custom_post_types() {
-	$cpt_configs = custom_post_type_configs();
-	if ( ! $cpt_configs ) {
+	$user_cpt_configs = custom_post_type_configs();
+	if ( ! $user_cpt_configs ) {
 		return;
 	}
 
-	foreach ( $cpt_configs as $cpt_config ) {
+	foreach ( $user_cpt_configs as $user_cpt_config ) {
+
+		$default_configs = default_custom_post_type_configs( $user_cpt_config );
+		
+		$user_cpt_config = array_replace( $default_configs, $user_cpt_config );
+
+		$defaults_same_as_public = array(
+			'publicly_queryable' => $user_cpt_config['publicly_queryable'],
+			'show_ui' => $user_cpt_config['show_ui'],
+			'show_in_nav_menus' => $user_cpt_config['show_in_nav_menus'],
+			'show_in_menu' => $user_cpt_config['show_in_menu'],
+			'show_in_admin_bar' => $user_cpt_config['show_in_admin_bar'],
+		);
+		foreach ($defaults_same_as_public as  $key => $default_same_as_public ) {
+			if ( $default_same_as_public === true || $default_same_as_public === false ) {
+				$defaults_same_as_public[$key] = $defaults_same_as_public[$key];
+			} else {
+				$defaults_same_as_public[$key] = $user_cpt_config['public'];
+			}
+		}
+		$user_cpt_config = array_replace( $user_cpt_config, $defaults_same_as_public );
+
+		if  ( $user_cpt_config['exclude_from_search'] === true || $user_cpt_config['exclude_from_search'] === false ) {
+			$user_cpt_config['exclude_from_search'] = $user_cpt_config['exclude_from_search'];
+		} elseif ( $user_cpt_config['public'] === true && $user_cpt_config['exclude_from_search'] === null ) {
+			$user_cpt_config['exclude_from_search'] = false;
+		} elseif ( $user_cpt_config['public'] === false && $user_cpt_config['exclude_from_search'] === null ) {
+			$user_cpt_config['exclude_from_search'] = true;
+		}
 
 		$post_or_page = 'post';
-
-		if ( $cpt_config['hierarchical'] == true ) {
+		if ( $user_cpt_config['hierarchical'] == true ) {
 			$post_or_page = 'page';
 		}
 
-		$features = get_all_post_type_features( $post_or_page, $cpt_config['excluded_features'] );
-
-		if (  ! $cpt_config['hierarchical']  && $cpt_config['page_attributes'] ) {
+		if (  ! $user_cpt_config['hierarchical']  && $user_cpt_config['page_attributes'] ) {
 			$features[] = 'page-attributes';
 		}
 
 		$labels = post_type_label_config(
-			$cpt_config['slug'],
-			$cpt_config['singular_name'],
-			$cpt_config['plural_name'],
-			$cpt_config['text_domain']
+			$user_cpt_config['slug'],
+			$user_cpt_config['singular_name'],
+			$user_cpt_config['plural_name'],
+			$user_cpt_config['text_domain']
 		);
 
+		$features = get_all_post_type_features( $post_or_page, $user_cpt_config['excluded_features'] );
+
 		$args = [
-			'public'            => $cpt_config['public'],
-			'labels'       		=> $labels,
-			'description'       => $cpt_config['description'],
-			'supports'     		=> $features,
-			'menu_icon'    		=> $cpt_config['icon'],
-			'hierarchical' 		=> $cpt_config['hierarchical'],
-			'has_archive'  		=> $cpt_config['has_archive'],
-			'menu_position'		=> $cpt_config['menu_position'],
-			'show_in_rest'      => $cpt_config['show_in_rest'],
+			'public'                => $user_cpt_config['public'],
+			'labels'       		    => $labels,
+			'description'           => $user_cpt_config['description'],
+			'supports'     		    => $features,
+			'menu_icon'    		    => $user_cpt_config['icon'],
+			'hierarchical' 		    => $user_cpt_config['hierarchical'],
+			'has_archive'  		    => $user_cpt_config['has_archive'],
+			'menu_position'		    => $user_cpt_config['menu_position'],
+			'show_in_rest'          => $user_cpt_config['show_in_rest'],
+			'exclude_from_search'   => $user_cpt_config['exclude_from_search'],
+			'publicly_queryable'    => $user_cpt_config['publicly_queryable'],
+			'show_ui'               => $user_cpt_config['show_ui'],
+			'show_in_nav_menus'     => $user_cpt_config['show_in_nav_menus'],
+			'show_in_menu'          => $user_cpt_config['show_in_menu'],
+			'show_in_admin_bar'     => $user_cpt_config['show_in_admin_bar'],
+			'register_meta_box_cb'  => $user_cpt_config['register_meta_box_cb'],
+			'taxonomies'            => $user_cpt_config['taxonomies'],
+			'rewrite'               => $user_cpt_config['rewrite'],
+			'query_var'             => $user_cpt_config['query_var'],
+			'can_export'            => $user_cpt_config['can_export'],
+			'delete_with_user'      => $user_cpt_config['delete_with_user'],
+			'rest_base'             => $user_cpt_config['rest_base'],
+
 		];
-		register_post_type( $cpt_config['slug'], $args );
+
+		ddd( $args );
+
+
+		register_post_type( $user_cpt_config['slug'], $args );
 	}
 }
 /**
@@ -130,22 +175,22 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  * @return 	array 	Amended post update messages with new CPT update messages.
  */
 function update_custom_post_type_messages( $messages ) {
-	$cpt_configs    =   custom_post_type_configs();
-	if ( ! $cpt_configs ) {
+	$user_cpt_configs    =   custom_post_type_configs();
+	if ( ! $user_cpt_configs ) {
 		return $messages;
 	}
 
 	$post           =   get_post();
 	$post_type      =   get_post_type( $post );
-	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
+	if ( ! in_array( $post_type, array_column( $user_cpt_configs, 'slug' ) ) ) {
 		return $messages;
 	}
 
-	foreach ( $cpt_configs as $key => $cpt_config ) {
+	foreach ( $user_cpt_configs as $key => $user_cpt_config ) {
 		$post_type_object   =   get_post_type_object( $post_type );
 		$post_type_labels   =   $post_type_object->labels;
 		$post_type_name     =   $post_type_labels->singular_name;
-		$text_domain        =   $cpt_config['text_domain'];
+		$text_domain        =   $user_cpt_config['text_domain'];
 
 		$messages[ $post_type ] = [
 			0   =>  '', // Unused. Messages start at index 1.
@@ -194,30 +239,30 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
  * @return 	void
  */
 function add_help_text_to_custom_post_type() {
-	$cpt_configs =  custom_post_type_configs();
-	if ( ! $cpt_configs ) {
+	$user_cpt_configs =  custom_post_type_configs();
+	if ( ! $user_cpt_configs ) {
 		return;
 	}
 
 	$screen      =  get_current_screen();
 	$post_type   =  $screen->post_type;
 
-	if ( ! in_array( $post_type, array_column( $cpt_configs, 'slug' ) ) ) {
+	if ( ! in_array( $post_type, array_column( $user_cpt_configs, 'slug' ) ) ) {
 		return;
 	}
 
-	foreach( $cpt_configs as $key => $cpt_config ) {
-		if ( $cpt_config['slug'] == $screen->post_type ) {
+	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
+		if ( $user_cpt_config['slug'] == $screen->post_type ) {
 
 			$help_content = load_help_content(
-				$cpt_config['slug'],
-				$cpt_config['singular_name'],
-				$cpt_config['text_domain']
+				$user_cpt_config['slug'],
+				$user_cpt_config['singular_name'],
+				$user_cpt_config['text_domain']
 			);
 
 			$config = array(
-				'id'      => "{$cpt_config['slug']}-help",
-				'title'   => "{$cpt_config['singular_name']} Help",
+				'id'      => "{$user_cpt_config['slug']}-help",
+				'title'   => "{$user_cpt_config['singular_name']} Help",
 				'content' => $help_content,
 			);
 
@@ -245,4 +290,20 @@ function load_help_content( $custom_post_type, $custom_post_type_name, $text_dom
 
 		return $help_content;
 
+}
+
+function default_custom_post_type_configs( $user_cpt_config ) {
+	return [
+		'description'           => '',
+		'public'                => false,
+		'menu_position'         => 25,
+		'hierarchical'          => false,
+		'has_archive'           => false,
+		'rewrite'               => array( 'slug', $user_cpt_config['slug'] ),
+		'query_var'             => true,
+		'can_export'            => true,
+		'show_in_rest'          => false,
+		'delete_with_user'      => null,
+		'rest_base'             => $user_cpt_config['slug'],
+	];
 }

@@ -27,14 +27,15 @@ function custom_post_type_configs() {
 			'icon'                  => 'dashicons-editor-help',
 			'description'           => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 			'public'                => true,
-			// Hierarchical = 'page' with parent and order attribute. When true 'page_attribute' below is automatically true.
-			'hierarchical' 		    => false,
-			// If you want order attribute but no parent set page_attributes to true below and hierarchical to false above.
-			'page_attributes' 		=> true,
+			'show_in_nav_menus'     => false,
+			'show_in_menu'          => true,
+			'exclude_from_search'   => false,
+			'hierarchical' 		    => true,
+			'page_attributes' 		=> false,
 			'has_archive'  		    => true,
-			'menu_position'		    => 5,
-			'show_in_rest'          => false,
-			'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+//			'menu_position'		    => 5,
+			'show_in_rest'          => true,
+//			'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
 			'excluded_features'     => array(
 				'excerpt',
 				'comments',
