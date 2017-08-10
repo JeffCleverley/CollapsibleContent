@@ -27,12 +27,13 @@ function register_custom_taxonomy() {
 
 	foreach( $taxonomy_configs as $taxonomy_config ) {
 		$labels = taxonomy_label_config( $taxonomy_config['labels'] );
-		$args = array(
-			'labels'                => $labels,
-		);
-		$args = array_merge( $args, $taxonomy_config['args'] );
 
-		register_taxonomy( $taxonomy_config['slug'], $taxonomy_config['post_types'], $args );
+		$args = array(
+			'labels'    => $labels,
+		);
+
+		$args = array_merge( $args, $taxonomy_config['args'] );
+		register_taxonomy( $taxonomy_config['labels']['slug'], $taxonomy_config['post_types'], $args );
 
 	};
 }

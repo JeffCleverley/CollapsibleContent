@@ -111,7 +111,7 @@ function get_all_post_type_features( $post_type = 'post', $excluded_features = a
 
 add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_messages' );
 /**
- * Update custom FAQ post type messages.
+ * Update custom post type messages.
  *
  * See /wp-admin/edit-form-advanced.php
  *
@@ -173,9 +173,85 @@ function update_custom_post_type_messages( $messages ) {
 			$messages[ $post_type ][8]  .=  $preview_link;
 			$messages[ $post_type ][10] .=  $preview_link;
 		}
+	}
+	return $messages;
+}
+
+add_filter( 'bulk_post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_bulk_messages', 10, 2 );
+/**
+ * Update custom post type bulk action messages.
+ *
+ * See /wp-admin/edit.php
+ *
+ * @since   0.0.1
+ *
+ * @param   array   $bulk_messages
+ * @param   array   $bulk_counts
+ *
+ * @return mixed
+ */
+function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
+	$user_cpt_configs = custom_post_type_configs();
+	if ( ! $user_cpt_configs ) {
+		return $bulk_messages;
+	}
+
+	$post      = get_post();
+	$post_type = get_post_type( $post );
+	foreach ( $user_cpt_configs as $user_cpt_config ) {
+		$slug_array[] = $user_cpt_config['labels']['slug'];
+	}
+	if ( ! in_array( $post_type, $slug_array ) ) {
 		return $messages;
 	}
+
+	foreach ( $user_cpt_configs as $key => $user_cpt_config ) {
+		$post_type_object      = get_post_type_object( $post_type );
+		$post_type_labels      = $post_type_object->labels;
+		$post_type_name        = $post_type_labels->singular_name;
+		$post_type_plural_name = $post_type_labels->plural_name;
+		$text_domain           = $user_cpt_config['labels']['text_domain'];
+
+		$bulk_messages[ $post_type ] = array(
+			'updated'   => _n( "%s {$post_type_name} updated.", "%s {$post_type_plural_name} updated.", $bulk_counts["updated"], $text_domain ),
+			'locked'    => _n( "%s {$post_type_name} not updated, somebody is editing it.", "%s {$post_type_plural_name} not updated, somebody is editing them.", $bulk_counts["locked"], $text_domain ),
+			'deleted'   => _n( "%s {$post_type_name} permanently deleted.", "%s {$post_type_plural_name} permanently deleted.", $bulk_counts["deleted"], $text_domain ),
+			'trashed'   => _n( "%s {$post_type_name} moved to the Trash.", "%s {$post_type_plural_name} moved to the Trash.", $bulk_counts["trashed"], $text_domain ),
+			'untrashed' => _n( "%s {$post_type_name} restored from the Trash.", "%s {$post_type_plural_name} restored from the Trash.", $bulk_counts["untrashed"], $text_domain ),
+		);
+
+		return $bulk_messages;
+	}
 }
+
+add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder');
+/**
+ * Change placeholder text in Title field.
+ *
+ * since    0.0.1
+ *
+ * @return  string   $title  placeholder text
+ */
+function change_add_title_placeholder() {
+
+	$user_cpt_configs = custom_post_type_configs();
+	if ( ! $user_cpt_configs ) {
+		return;
+	}
+
+	$screen     = get_current_screen();
+	$post_type  = $screen->post_type;
+
+	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
+
+		if ( $user_cpt_config['labels']['slug'] == $screen->post_type && ! $user_cpt_config['labels']['title_placeholder'] ) {
+			$title = "Enter a new {$user_cpt_config['labels']['singular_name']} title here...";
+		} elseif ( $user_cpt_config['labels']['slug'] == $screen->post_type && $user_cpt_config['labels']['title_placeholder']) {
+			$title = $user_cpt_config['labels']['title_placeholder'];
+		}
+	}
+	return $title;
+};
 
 add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
 /**
@@ -198,19 +274,24 @@ function add_help_text_to_custom_post_type() {
 	$screen     = get_current_screen();
 	$post_type  = $screen->post_type;
 
-	foreach ($user_cpt_configs as $user_cpt_config) {
-		$slug_array[] = $user_cpt_config['labels']['slug'];
-	}
-	if ( ! in_array( $post_type, $slug_array ) ) {
-		return;
-	}
-
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
+
+		if ( ! $user_cpt_config['help'] ) {
+			continue;
+		}
+
+		if ( ! $user_cpt_config['help']['help_content'] && ! $user_cpt_config['help']['link'] ) {
+			continue;
+		}
+
 		if ( $user_cpt_config['labels']['slug'] == $screen->post_type ) {
+
 			$help_content = load_help_content(
 				$user_cpt_config['labels']['slug'],
 				$user_cpt_config['labels']['singular_name'],
-				$user_cpt_config['labels']['text_domain']
+				$user_cpt_config['labels']['text_domain'],
+				$user_cpt_config['help']['help_content'],
+				$user_cpt_config['help']['help_link']
 			);
 
 			$config = array(
@@ -235,30 +316,25 @@ function add_help_text_to_custom_post_type() {
  *
  * @return 	string 	$help_content 	HTML and Text from help view
  */
-function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain ) {
+function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain, $help_content, $help_link ) {
 
 	$obj = get_post_type_object( $custom_post_type );
 	$description = esc_html( $obj->description );
-	$help_top_header = __("{$custom_post_type_name} Help", $text_domain );
-	$help_item_description = __( $description, $text_domain );
-	$help_paragraph_1 = /** @lang text */
-		<<<EOD
-		Make sure you concisely explain the question and give content to why it might cause a problem for someone, if possible.</br>
-		Clearly explain your answer, try to imagine how a user reading your answer might interpret it. Give examples where needed.
-EOD;
-	$help_paragraph_1 = __( $help_paragraph_1, $text_domain );
-	$help_middle_header = __("If you want to schedule the {$custom_post_type_name} to be published in the future:", $text_domain );
-	$help_paragraph_2 = /** @lang text */
+	$help_top_header        = __("{$custom_post_type_name} Help", $text_domain );
+	$help_description       = __( $description, $text_domain );
+	$help_content           = __( $help_content, $text_domain );
+	$schedule_help_header   = __("If you want to schedule the {$custom_post_type_name} to be published in the future:", $text_domain );
+	$schedule_help_content  = /** @lang text */
 		<<<EOD
 		Under the Publish module, click on the Edit link next to Publish.</br>
 		Change the date to the date to actually publish the {$custom_post_type_name}, then click on Ok.
 EOD;
-	$help_paragraph_2 = __( $help_paragraph_2, $text_domain );
-	$header_more_information = __('For more information:', $text_domain );
-	$help_link = __('<a href="https//:github.com/JeffCleverley/CollapsibleContent" target="_blank">Collapsible Content Plugin Documentation</a>', $text_domain );
+	$schedule_help_content   = __( $schedule_help_content, $text_domain );
+	$more_information_header = __('For more information:', $text_domain );
+	$help_link = __("<a href='{$help_link}' target='_blank'>{$custom_post_type_name} Module Documentation</a>", $text_domain );
 
 	ob_start();
-	include( dirname( __FILE__ ) . "/../templates/views/{$custom_post_type}-help-view.php" );
+	include( dirname( __FILE__ ) . "/views/help-view.php" );
 	return ob_get_clean();
 }
 
