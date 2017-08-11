@@ -42,6 +42,7 @@ function autoload() {
 	$files = [
 		'shortcode/shortcodes.php',
 		'faq/module.php',
+		'custom/module.php',
 	];
 
 	foreach( $files as $file ) {

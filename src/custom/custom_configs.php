@@ -2,14 +2,14 @@
 /**
  * Configs for DRY custom post type and taxonomy creation.
  *
- * @package     Deftly\Module\FAQ\Custom
+ * @package     Deftly\Module\Custom;
  * @since       0.0.1
  * @author      Jeff Cleverley
  * @link        https://github.com/JeffCleverley/
  * @license     GNU General Public License 2.0+
  *
  */
-namespace  Deftly\Module\FAQ\Custom;
+namespace Deftly\Module\Custom;
 /**
  * Configure Custom Post Types.
  * Enter an additional array for each new post type
@@ -20,11 +20,12 @@ function custom_post_type_configs() {
 	return array(
 		[ // Beginning of post type config.
 			'labels'    => array(
-				'slug'              => 'faq',
-				'singular_name'     => 'FAQ',
-				'plural_name'       => 'FAQs',
-				'text_domain'       => FAQ_MODULE_TEXT_DOMAIN,
-				'title_placeholder' => 'Enter a title for your FAQ here...',
+				'slug'                  => 'faq',
+				'singular_name'         => 'FAQ',
+				'plural_name'           => 'FAQs',
+				'lowercase_in_sentence' => false,
+				'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+				'title_placeholder'     => 'Enter a title for your FAQ here...',
 			),
 			'args'  => array(
 				'menu_icon'         => 'dashicons-editor-help',
@@ -35,17 +36,19 @@ function custom_post_type_configs() {
 				'menu_position'		=> 5,
 				'show_in_rest'      => true,
 			),
-			'excluded_features' => array(
-				'excerpt',
-				'comments',
-				'trackbacks',
-				'custom-fields',
-				'thumbnail',
+			'features'  =>  array(
+				'base_post_type'        => 'post',
+				'excluded_features'     => array(
+					'excerpt',
+					'comments',
+					'trackbacks',
+					'custom-fields',
+				),
+				'additional_features'   => array(
+					'page-attributes',
+				),
 			),
-			'additional_features' => array(
-				'page-attributes',
-			),
-			'help'              => array(
+			'help'                      => array(
 				array(
 					'help_tab_id'       => 'faq-help',
 					'help_title'        => 'FAQ Help',

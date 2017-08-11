@@ -26,7 +26,7 @@ add_filter( 'archive_template', __NAMESPACE__ . '\load_the_faq_archive_template'
  * @return  string
  */
 function load_the_faq_archive_template( $archive_template ) {
-	$cpt_configs = Custom\custom_post_type_configs();
+	$cpt_configs = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/post-type.php' );
 	if ( ! $cpt_configs ) {
 		return $archive_template;
 	}

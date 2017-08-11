@@ -25,7 +25,7 @@ define( 'FAQ_MODULE_DIR', __DIR__ );
 function autoload() {
 	$files = [
 		'custom/post-type.php',
-		'custom/taxonomy.php',
+  	    'custom/taxonomy.php',
 		'custom/custom_configs.php',
 		'shortcode/shortcode.php',
 		'templates/helpers.php',
