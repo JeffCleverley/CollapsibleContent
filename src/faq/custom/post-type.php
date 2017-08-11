@@ -27,17 +27,19 @@ function register_custom_post_types() {
 
 	foreach ( $user_cpt_configs as $user_cpt_config ) {
 
+		$custom_post_type = $user_cpt_config['labels']['slug'];
+		$is_user_cpt_hierarchical =  $user_cpt_config['args']['hierarchical'];
+		$labels = post_type_label_config( $user_cpt_config['labels'] );
+
 		$post_or_page = 'post';
-		if ( $user_cpt_config['args']['hierarchical'] == true ) {
+		if ( $is_user_cpt_hierarchical ) {
 			$post_or_page = 'page';
 		}
 
 		$features = get_all_post_type_features( $post_or_page, $user_cpt_config['excluded_features'] );
-		if (  ! $user_cpt_config['args']['hierarchical']  && $user_cpt_config['args']['page_attributes'] ) {
+		if (  ! $is_user_cpt_hierarchical  && $user_cpt_config['args']['page_attributes'] ) {
 			$features[] = 'page-attributes';
 		}
-
-		$labels = post_type_label_config( $user_cpt_config['labels'] );
 
 		$args = [
 			'labels'    => $labels,
@@ -45,8 +47,7 @@ function register_custom_post_types() {
 		];
 
 		$args = array_merge( $args, $user_cpt_config['args'] );
-
-		register_post_type( $user_cpt_config['labels']['slug'], $args );
+		register_post_type( $custom_post_type, $args );
 	}
 }
 /**
@@ -105,7 +106,6 @@ function get_all_post_type_features( $post_type = 'post', $excluded_features = a
 	if ( ! $excluded_features ) {
 		return $configured_features;
 	}
-
 	return array_diff( $configured_features, $excluded_features );
 }
 
@@ -202,7 +202,7 @@ function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
 		$slug_array[] = $user_cpt_config['labels']['slug'];
 	}
 	if ( ! in_array( $post_type, $slug_array ) ) {
-		return $messages;
+		return $bulk_messages;
 	}
 
 	foreach ( $user_cpt_configs as $key => $user_cpt_config ) {
@@ -233,20 +233,17 @@ add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder')
  * @return  string   $title  placeholder text
  */
 function change_add_title_placeholder() {
-
 	$user_cpt_configs = custom_post_type_configs();
 	if ( ! $user_cpt_configs ) {
 		return;
 	}
-
 	$screen     = get_current_screen();
 	$post_type  = $screen->post_type;
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
-
-		if ( $user_cpt_config['labels']['slug'] == $screen->post_type && ! $user_cpt_config['labels']['title_placeholder'] ) {
+		if ( $user_cpt_config['labels']['slug'] == $post_type && ! $user_cpt_config['labels']['title_placeholder'] ) {
 			$title = "Enter a new {$user_cpt_config['labels']['singular_name']} title here...";
-		} elseif ( $user_cpt_config['labels']['slug'] == $screen->post_type && $user_cpt_config['labels']['title_placeholder']) {
+		} elseif ( $user_cpt_config['labels']['slug'] == $post_type && $user_cpt_config['labels']['title_placeholder']) {
 			$title = $user_cpt_config['labels']['title_placeholder'];
 		}
 	}
@@ -275,34 +272,34 @@ function add_help_text_to_custom_post_type() {
 	$post_type  = $screen->post_type;
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
-
-		if ( ! $user_cpt_config['help'] ) {
+		$user_help_configs = $user_cpt_config['help'];
+		$test_empty_configs_array = array_filter($user_help_configs);
+		if ( empty( $test_empty_configs_array) ) {
 			continue;
 		}
 
-		if ( ! $user_cpt_config['help']['help_content'] && ! $user_cpt_config['help']['link'] ) {
-			continue;
-		}
-
-		if ( $user_cpt_config['labels']['slug'] == $screen->post_type ) {
-
-			$help_content = load_help_content(
+		if ( $user_cpt_config['labels']['slug'] == $post_type ) {
+			foreach ($user_help_configs as $user_help_config) {
+				$help_content = load_help_content(
 				$user_cpt_config['labels']['slug'],
 				$user_cpt_config['labels']['singular_name'],
 				$user_cpt_config['labels']['text_domain'],
-				$user_cpt_config['help']['help_content'],
-				$user_cpt_config['help']['help_link']
+				$user_help_config['help_title'],
+				$user_help_config['help_content'],
+				$user_help_config['help_link']
 			);
 
 			$config = array(
-				'id'      => "{$user_cpt_config['labels']['slug']}-help",
-				'title'   => "{$user_cpt_config['labels']['singular_name']} Help",
+				'id'      => "{$user_help_config['help_tab_id']}",
+				'title'   => "{$user_help_config['help_title']}",
 				'content' => $help_content,
 			);
 			$screen->add_help_tab( $config );
+			}
 		}
 	}
 }
+
 /**
  * Function to load view into $configuration_content array as 'content' ^
  *
@@ -316,22 +313,15 @@ function add_help_text_to_custom_post_type() {
  *
  * @return 	string 	$help_content 	HTML and Text from help view
  */
-function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain, $help_content, $help_link ) {
+function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain, $help_title, $help_content, $help_link ) {
 
 	$obj = get_post_type_object( $custom_post_type );
 	$description = esc_html( $obj->description );
-	$help_top_header        = __("{$custom_post_type_name} Help", $text_domain );
+	$help_top_header        = __("{$help_title}", $text_domain );
 	$help_description       = __( $description, $text_domain );
 	$help_content           = __( $help_content, $text_domain );
-	$schedule_help_header   = __("If you want to schedule the {$custom_post_type_name} to be published in the future:", $text_domain );
-	$schedule_help_content  = /** @lang text */
-		<<<EOD
-		Under the Publish module, click on the Edit link next to Publish.</br>
-		Change the date to the date to actually publish the {$custom_post_type_name}, then click on Ok.
-EOD;
-	$schedule_help_content   = __( $schedule_help_content, $text_domain );
 	$more_information_header = __('For more information:', $text_domain );
-	$help_link = __("<a href='{$help_link}' target='_blank'>{$custom_post_type_name} Module Documentation</a>", $text_domain );
+	$help_link = __('<a href="' . $help_link . '" target="_blank">' . $custom_post_type_name . ' Module Documentation</a>', $text_domain );
 
 	ob_start();
 	include( dirname( __FILE__ ) . "/views/help-view.php" );

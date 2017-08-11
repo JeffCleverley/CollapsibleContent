@@ -14,16 +14,14 @@ namespace  Deftly\Module\FAQ\Custom;
  * Configure Custom Post Types.
  * Enter an additional array for each new post type
  *
- * REMEMBER - also need to create a view file for each CPT's help tab content.
- *
  * @return array
  */
 function custom_post_type_configs() {
 	return array(
 		[ // Beginning of post type config.
 			'labels'    => array(
-				'singular_name'     => 'FAQ',
 				'slug'              => 'faq',
+				'singular_name'     => 'FAQ',
 				'plural_name'       => 'FAQs',
 				'text_domain'       => FAQ_MODULE_TEXT_DOMAIN,
 				'title_placeholder' => 'Enter a title for your FAQ here...',
@@ -35,6 +33,7 @@ function custom_post_type_configs() {
 				'page_attributes'   => true,
 				'has_archive'  		=> true,
 				'menu_position'		=> 5,
+				'show_in_rest'      => true,
 			),
 			'excluded_features' => array(
 				'excerpt',
@@ -44,14 +43,24 @@ function custom_post_type_configs() {
 				'thumbnail',
 			),
 			'help'              => array(
-				'help_content'      => 'Clearly explain the question and give context to your answers.<br> If you give examples of the sorts of situations the FAQ is intended to address, it will help the readers no end.',
-				'help_link'         => 'https//:github.com/JeffCleverley/CollapsibleContent',
-	)
+				array(
+					'help_tab_id'       => 'faq-help',
+					'help_title'        => 'FAQ Help',
+					'help_content'      => 'Some help content to helpfully help people who need help!',
+					'help_link'         => 'https://github.com/JeffCleverley/CollapsibleContent',
+				),
+				array(
+					'help_tab_id'       => 'faq-support',
+					'help_title'        => 'FAQ Support',
+					'help_content'      => 'Some support content to support those in need of support.',
+					'help_link'         => 'https://github.com/JeffCleverley/CollapsibleContent',
+				),
+			),
 		], // End of post type config.
 		[ // Beginning of post type config.
-				'labels'    => array(
-					'singular_name'     => 'Test',
+			'labels'    => array(
 				'slug'              => 'test',
+				'singular_name'     => 'Test',
 				'plural_name'       => 'Tests',
 				'text_domain'       => FAQ_MODULE_TEXT_DOMAIN,
 				'title_placeholder' => '',
@@ -71,10 +80,7 @@ function custom_post_type_configs() {
 				'custom-fields',
 				'thumbnail',
 			),
-			'help'              => array(
-				'help_content'      => '',
-				'help_link'         => '',
-			),
+			'help'              => array(),
 		], // End of post type config.
 	);
 }
