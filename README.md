@@ -16,6 +16,17 @@ This plugin includes the following features:
 - Font icon visual indicator
 - jQuery sliding animation
 
+The FAQ feature is built as a module. It uses a CPT and Custom Taxonomy generator.
+The generator allows multiple custom post types and taxonomies to be created from one
+config file, and allows configuration for:
+
+- all messages (incl bulk) 
+- all labels
+- all supported features
+- multiple help tabs
+
+I will extricate this into it's own custom content module shortly, when I have moved onto OOP.
+
 ## Installation
 
 ### Using Git Clone
