@@ -13,7 +13,7 @@ namespace  Deftly\Module\FAQ\Custom;
 
 add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
 /**
- * Register the custom FAQ post type.
+ * Register the custom FAQ post types.
  *
  * @since 1.0.0
  *
@@ -26,30 +26,74 @@ function register_custom_post_types() {
 	}
 
 	foreach ( $user_cpt_configs as $user_cpt_config ) {
-
-		$custom_post_type = $user_cpt_config['labels']['slug'];
-		$is_user_cpt_hierarchical =  $user_cpt_config['args']['hierarchical'];
-		$labels = post_type_label_config( $user_cpt_config['labels'] );
-
-		$post_or_page = 'post';
-		if ( $is_user_cpt_hierarchical ) {
-			$post_or_page = 'page';
-		}
-
-		$features = get_all_post_type_features( $post_or_page, $user_cpt_config['excluded_features'] );
-		if (  ! $is_user_cpt_hierarchical  && $user_cpt_config['args']['page_attributes'] ) {
-			$features[] = 'page-attributes';
-		}
-
-		$args = [
-			'labels'    => $labels,
-			'supports'  => $features,
-		];
-
-		$args = array_merge( $args, $user_cpt_config['args'] );
-		register_post_type( $custom_post_type, $args );
+		register_custom_post_type( $user_cpt_config );
 	}
 }
+
+/**
+ * Register each custom post type
+ *
+ * @since   0.0.1
+ *
+ * @param   array   $user_cpt_config
+ */
+function register_custom_post_type( $user_cpt_config ) {
+
+	$custom_post_type = $user_cpt_config['labels']['slug'];
+	$is_user_cpt_hierarchical =  $user_cpt_config['args']['hierarchical'];
+
+	$post_or_page = 'post';
+	if ( $is_user_cpt_hierarchical ) {
+		$post_or_page = 'page';
+	}
+
+	$features = generate_all_post_type_features(
+		$user_cpt_config['excluded_features'],
+		$user_cpt_config['additional_features'],
+		$post_or_page
+	);
+
+	$labels = post_type_label_config( $user_cpt_config['labels'] );
+
+	$args = [
+		'supports'  => $features,
+		'labels'    => $labels,
+	];
+
+	$args = array_merge( $args, $user_cpt_config['args'] );
+	register_post_type( $custom_post_type, $args );
+}
+
+/**
+ * Generate all the post type features for the given post type.
+ *
+ * @since 	0.0.1
+ *
+ * @param 	array 	$excluded_features 	    Array of features to exclude
+ * @param   array   $additional_features    Array of additional features to include
+ * @param 	string 	$post_type 			    Given post type
+ *
+ * @return 	array
+ */
+function generate_all_post_type_features( $excluded_features = array(), $additional_features, $post_type = 'post' ) {
+	$base_post_type_features = array_keys( get_all_post_type_supports( $post_type ) );
+	if ( ! $excluded_features && ! $additional_features ) {
+		return $base_post_type_features;
+	}
+
+	$user_configured_features = $base_post_type_features;
+
+	if ( $excluded_features ) {
+		$user_configured_features = array_diff( $base_post_type_features, $excluded_features );
+	}
+
+	if ( $additional_features ) {
+		$user_configured_features  = array_merge( $user_configured_features, $additional_features );
+	}
+
+	return $user_configured_features ;
+}
+
 /**
  * Get all the post type labels for the given post type.
  *
@@ -90,23 +134,6 @@ function post_type_label_config( $labels ) {
 		'remove_featured_image' => __( "Remove {$singular_label} Image", $text_domain ),
 		'use_featured_image'    => __( "Use {$singular_label} Image", $text_domain ),
 	];
-}
-/**
- * Get all the post type features for the given post type.
- *
- * @since 	0.0.1
- *
- * @param 	string 	$post_type 			Given post type
- * @param 	array 	$excluded_features 	Array of features to exclude
- *
- * @return 	array
- */
-function get_all_post_type_features( $post_type = 'post', $excluded_features = array() ) {
-	$configured_features = array_keys( get_all_post_type_supports( $post_type ) );
-	if ( ! $excluded_features ) {
-		return $configured_features;
-	}
-	return array_diff( $configured_features, $excluded_features );
 }
 
 add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_messages' );
@@ -230,12 +257,14 @@ add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder')
  *
  * since    0.0.1
  *
+ * @param   string  $title
+ *
  * @return  string   $title  placeholder text
  */
-function change_add_title_placeholder() {
+function change_add_title_placeholder( $title ) {
 	$user_cpt_configs = custom_post_type_configs();
 	if ( ! $user_cpt_configs ) {
-		return;
+		return $title;
 	}
 	$screen     = get_current_screen();
 	$post_type  = $screen->post_type;
@@ -250,7 +279,7 @@ function change_add_title_placeholder() {
 	return $title;
 };
 
-add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
+add_action('admin_head', __NAMESPACE__ . '\add_help_tab_to_custom_post_type');
 /**
  * Add help tab for custom post types
  * Remember to create the necessary views!
@@ -262,7 +291,7 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_text_to_custom_post_type');
  *
  * @return 	void
  */
-function add_help_text_to_custom_post_type() {
+function add_help_tab_to_custom_post_type() {
 	$user_cpt_configs = custom_post_type_configs();
 	if ( ! $user_cpt_configs ) {
 		return;
@@ -273,30 +302,41 @@ function add_help_text_to_custom_post_type() {
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
 		$user_help_configs = $user_cpt_config['help'];
-		$test_empty_configs_array = array_filter($user_help_configs);
-		if ( empty( $test_empty_configs_array) ) {
+		$configs_array_to_test_if_empty = array_filter( $user_help_configs );
+		if ( empty( $configs_array_to_test_if_empty ) ) {
 			continue;
 		}
-
 		if ( $user_cpt_config['labels']['slug'] == $post_type ) {
-			foreach ($user_help_configs as $user_help_config) {
-				$help_content = load_help_content(
-				$user_cpt_config['labels']['slug'],
-				$user_cpt_config['labels']['singular_name'],
-				$user_cpt_config['labels']['text_domain'],
-				$user_help_config['help_title'],
-				$user_help_config['help_content'],
-				$user_help_config['help_link']
-			);
-
-			$config = array(
-				'id'      => "{$user_help_config['help_tab_id']}",
-				'title'   => "{$user_help_config['help_title']}",
-				'content' => $help_content,
-			);
-			$screen->add_help_tab( $config );
-			}
+			generate_help_tab_content( $user_help_configs, $user_cpt_config, $screen );
 		}
+	}
+}
+
+/**
+ * Generate the content for the help tab
+ *
+ * @param $user_help_configs
+ * @param $user_cpt_config
+ * @param $screen
+ *
+ * @return void
+ */
+function generate_help_tab_content( $user_help_configs, $user_cpt_config, $screen ) {
+	foreach ($user_help_configs as $user_help_config) {
+		$help_content = load_help_content(
+			$user_cpt_config['labels']['slug'],
+			$user_cpt_config['labels']['singular_name'],
+			$user_cpt_config['labels']['text_domain'],
+			$user_help_config['help_title'],
+			$user_help_config['help_content'],
+			$user_help_config['help_link']
+		);
+		$config = array(
+			'id'      => "{$user_help_config['help_tab_id']}",
+			'title'   => "{$user_help_config['help_title']}",
+			'content' => $help_content,
+		);
+		$screen->add_help_tab( $config );
 	}
 }
 

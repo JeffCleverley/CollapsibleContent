@@ -42,6 +42,9 @@ function custom_post_type_configs() {
 				'custom-fields',
 				'thumbnail',
 			),
+			'additional_features' => array(
+				'page-attributes',
+			),
 			'help'              => array(
 				array(
 					'help_tab_id'       => 'faq-help',
@@ -69,7 +72,6 @@ function custom_post_type_configs() {
 				'menu_icon'         => 'dashicons-editor-help',
 				'description'       => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 				'public'            => true,
-				'page_attributes'   => true,
 				'has_archive'  		=> true,
 				'menu_position'		=> 5,
 			),
@@ -79,6 +81,9 @@ function custom_post_type_configs() {
 				'trackbacks',
 				'custom-fields',
 				'thumbnail',
+			),
+			'supported_features' => array(
+				'page_attributes',
 			),
 			'help'              => array(),
 		], // End of post type config.
