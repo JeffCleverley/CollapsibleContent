@@ -26,6 +26,7 @@ function autoload() {
 	$files = [
 		'taxonomy.php',
 		'post-type.php',
+		'label-generator.php',
 	];
 
 	foreach( $files as $file ) {

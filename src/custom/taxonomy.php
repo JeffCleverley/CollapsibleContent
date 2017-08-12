@@ -1,6 +1,6 @@
 <?php
 /**
- * FAQ Custom Taxonomy Handler
+ * Custom Taxonomy Handler
  *
  * @package     Deftly\Module\Custom
  * @since       0.0.1
