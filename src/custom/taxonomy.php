@@ -1,6 +1,6 @@
 <?php
 /**
- * FAQ Custom Taxonomiy Handler
+ * FAQ Custom Taxonomy Handler
  *
  * @package     Deftly\Module\Custom
  * @since       0.0.1
@@ -22,7 +22,9 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_taxonomies' );
  * @return void
  */
 function register_custom_taxonomies( $config ) {
-	$taxonomy_configs = $config;
+
+	$taxonomy_configs = (array) apply_filters( 'add_custom_taxonomy_runtime_config', array() );
+
 	if ( ! $taxonomy_configs ) {
 		return;
 	}
@@ -108,7 +110,8 @@ add_filter( 'genesis_post_meta', __NAMESPACE__ . '\filter_custom_taxonomies_to_g
  * @return  string              default with custom taxonomies concatenated on in shortcode form.
  */
 function filter_custom_taxonomies_to_genesis_footer_post_meta( $post_meta ) {
-	$taxonomy_configs = custom_taxonomies_configs();
+	$taxonomy_configs = (array) apply_filters( 'add_custom_taxonomy_runtime_config', array() );
+
 	if ( ! $taxonomy_configs ) {
 		return $post_meta;
 	}

@@ -11,7 +11,7 @@
  */
 namespace Deftly\Module\FAQ\Custom;
 
-add_action( 'init', __NAMESPACE__ . '\register_faq_custom_taxonomy' );
+add_action( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq_custom_taxonomy' );
 /**
  * Register the custom FAQ taxonomies.
  *
@@ -26,5 +26,7 @@ function register_faq_custom_taxonomy() {
 		return;
 	}
 
-	\Deftly\Module\Custom\register_custom_taxonomies( $config );
+	$configs[ $config['labels']['slug'] ] = $config;
+
+	return $configs;
 }

@@ -26,6 +26,8 @@
 */
 namespace  Deftly\CollapsibleContent;
 
+use Deftly\Module\Custom as CustomModule;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit( "Nothing to see here, move along now...!" );
 }
@@ -40,5 +42,8 @@ define( 'COLLAPSIBLE_CONTENT_URL', $plugin_url );
 define( 'COLLAPSIBLE_CONTENT_TEXT_DOMAIN', 'collapsible_content' );
 
 include( __DIR__ . '/src/plugin.php' );
+
+CustomModule\register_plugin_with_custom_module_rewrite_deletes( __FILE__ );
+
 
 

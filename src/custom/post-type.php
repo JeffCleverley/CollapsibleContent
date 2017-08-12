@@ -20,6 +20,14 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
  * @return void
  */
 function register_custom_post_types() {
+	/*
+	 * Add custom post type runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$user_cpt_configs = (array) apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return;
@@ -99,7 +107,6 @@ function generate_all_post_type_features( $excluded_features = array(), $additio
  * @return 	array
  */
 function post_type_label_config( $labels ) {
-
 	$plural_label = $labels['plural_name'];
 	$singular_label = $labels['singular_name'];
 	$post_type = $labels['slug'];
@@ -151,7 +158,14 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  * @return 	array 	$messages   Amended post update messages with new CPT update messages.
  */
 function update_custom_post_type_messages( $messages ) {
-
+	/*
+	 * Add custom post type runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 
 	if ( ! $user_cpt_configs ) {
@@ -223,7 +237,14 @@ add_filter( 'bulk_post_updated_messages', __NAMESPACE__ . '\update_custom_post_t
  * @return mixed
  */
 function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
-
+	/*
+	 * Add custom post type runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$user_cpt_configs = (array) apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return $bulk_messages;
@@ -268,6 +289,14 @@ add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder')
  * @return  string   $title  placeholder text
  */
 function change_add_title_placeholder( $title ) {
+	/*
+	 * Add custom post type runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return $title;
@@ -299,6 +328,14 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_tab_to_custom_post_type');
  * @return 	void
  */
 function add_help_tab_to_custom_post_type() {
+	/*
+	 * Add custom post type runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return;
@@ -361,7 +398,6 @@ function generate_help_tab_content( $user_help_configs, $user_cpt_config, $scree
  * @return 	string 	$help_content 	HTML and Text from help view
  */
 function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain, $help_title, $help_content, $help_link ) {
-
 	$obj = get_post_type_object( $custom_post_type );
 	$description = esc_html( $obj->description );
 	$help_top_header        = __("{$help_title}", $text_domain );
