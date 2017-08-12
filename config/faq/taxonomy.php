@@ -14,6 +14,7 @@ return array(
 		'slug'                  => 'topic',
 		'singular_name'         => 'Topic',
 		'plural_name'           => 'Topics',
+		'lowercase_in_sentence' => false,
 		'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
 	),
 	'args'  => array(

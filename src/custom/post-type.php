@@ -47,23 +47,23 @@ function register_custom_post_types() {
  */
 function register_custom_post_type( $post_type, array $user_cpt_config ) {
 
-	$config_args = $user_cpt_config['args'];
+	$args = $user_cpt_config['args'];
 	$user_features = $user_cpt_config['features'];
 
-	if ( $config_args['hierarchical'] ) {
+	if ( $args['hierarchical'] ) {
 		$user_features['base_post_type'] = 'page';
 	}
 
-	$features = generate_all_post_type_features( $user_features['excluded_features'], $user_features['additional_features'], $user_features['base_post_type'] );
+	$features = generate_all_post_type_features(
+		$user_features['excluded_features'],
+		$user_features['additional_features'],
+		$user_features['base_post_type']
+	);
+	$args['supports'] = $features;
 
 	$labels = post_type_label_config( $user_cpt_config['labels'] );
+	$args['labels'] = $labels;
 
-	$args = [
-		'supports'  => $features,
-		'labels'    => $labels,
-	];
-
-	$args = array_merge( $args, $config_args );
 	register_post_type( $post_type, $args );
 }
 
@@ -80,6 +80,7 @@ function register_custom_post_type( $post_type, array $user_cpt_config ) {
  */
 function generate_all_post_type_features( $excluded_features = array(), $additional_features = array(), $post_type = 'post' ) {
 	$base_post_type_features = array_keys( get_all_post_type_supports( $post_type ) );
+
 	if ( ! $excluded_features && ! $additional_features ) {
 		return $base_post_type_features;
 	}
@@ -89,7 +90,6 @@ function generate_all_post_type_features( $excluded_features = array(), $additio
 	if ( $excluded_features ) {
 		$features = array_diff( $features, $excluded_features );
 	}
-
 	if ( $additional_features ) {
 		$features  = array_merge( $features, $additional_features );
 	}

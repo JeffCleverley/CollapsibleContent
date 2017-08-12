@@ -22,34 +22,39 @@ add_action( 'init', __NAMESPACE__ . '\register_custom_taxonomies' );
  * @return void
  */
 function register_custom_taxonomies( $config ) {
-
+	/*
+	 * Add custom taxonomy runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$taxonomy_configs = (array) apply_filters( 'add_custom_taxonomy_runtime_config', array() );
-
 	if ( ! $taxonomy_configs ) {
 		return;
 	}
 
-	foreach( $taxonomy_configs as $taxonomy_config ) {
-		register_custom_taxonomy( $taxonomy_config );
+	foreach( $taxonomy_configs as $taxonomy => $taxonomy_config ) {
+		register_custom_taxonomy( $taxonomy, $taxonomy_config );
 	};
 }
 
 /**
  * Register each Custom Taxonomy
  *
- * @since 0.0.1
+ * @since   0.0.1
  *
- * @param $taxonomy_config
+ * @param   string  $taxonomy
+ * @param   array   $config
+ *
+ * @return  void
  */
-function register_custom_taxonomy( $taxonomy_config ) {
-	$labels = taxonomy_label_config( $taxonomy_config['labels'] );
+function register_custom_taxonomy( $taxonomy, array $config ) {
+	$args = $config['args'];
+	$args['labels'] = taxonomy_label_config( $config['labels'] );
 
-	$args = array(
-		'labels'    => $labels,
-	);
-	$args = array_merge( $args, $taxonomy_config['args'] );
-
-	register_taxonomy( $taxonomy_config['labels']['slug'], $taxonomy_config['post_types'], $args );
+	register_taxonomy( $taxonomy, $config['post_types'], $args );
 }
 
 /**
@@ -63,6 +68,13 @@ function taxonomy_label_config( $taxonomy_labels ) {
 	$text_domain = $taxonomy_labels['text_domain'];
 	$plural_label = $taxonomy_labels['plural_name'];
 	$singular_label = $taxonomy_labels['singular_name'];
+	$in_sentence_singular = $singular_label;
+	$in_sentence_plural = $plural_label;
+
+	if ( $labels ['lowercase_in_sentence'] ) {
+		$in_sentence_singular = mb_strtolower( $singular_label, 'UTF-8' );
+		$in_sentence_plural = mb_strtolower( $plural_label, 'UTF-8' );
+	}
 
 	$labels = [
 		'name'              => _x( $plural_label, 'taxonomy general name', $text_domain ),
@@ -73,8 +85,8 @@ function taxonomy_label_config( $taxonomy_labels ) {
 		'view_item'         => __( "View {$singular_label}", $text_domain ),
 		'update_item'       => __( "Update {$singular_label}", $text_domain ),
 		'add_new_item'      => __( "Add New {$singular_label}", $text_domain ),
-		'new_item_name'     => __( "New {$singular_label} Name", $text_domain ),
-		'not_found'         => __( "No {$plural_label} found.", $text_domain ),
+		'new_item_name'     => __( "New {$in_sentence_singular} Name", $text_domain ),
+		'not_found'         => __( "No {$in_sentence_plural} found.", $text_domain ),
 	];
 
 	if ( $taxonomy_labels['hierarchical'] === false ) {
@@ -110,8 +122,15 @@ add_filter( 'genesis_post_meta', __NAMESPACE__ . '\filter_custom_taxonomies_to_g
  * @return  string              default with custom taxonomies concatenated on in shortcode form.
  */
 function filter_custom_taxonomies_to_genesis_footer_post_meta( $post_meta ) {
+	/*
+	 * Add custom taxonomy runtime configurations from generating and registering
+	 * each with WordPress
+	 *
+	 * @since   0.0.1
+	 *
+	 * @param   array   Array of configurations
+	 */
 	$taxonomy_configs = (array) apply_filters( 'add_custom_taxonomy_runtime_config', array() );
-
 	if ( ! $taxonomy_configs ) {
 		return $post_meta;
 	}
