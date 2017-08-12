@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom Taxonomy Handler
+ * Custom Label Handler
  *
  * @package     Deftly\Module\Custom
  * @since       0.0.1
@@ -12,7 +12,8 @@
 namespace Deftly\Module\Custom;
 
 /**
- * Get all the post type labels for the given post type.
+ * Generate all the labels for custom post types.
+ * Will be updated to be used for taxonomies too.
  *
  * @since 	0.0.1
  *
