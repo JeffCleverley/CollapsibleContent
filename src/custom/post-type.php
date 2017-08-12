@@ -1,6 +1,6 @@
 <?php
 /**
- * FAQ Custom Post Types
+ * FAQ Custom Post Types Generator
  *
  * @package     Deftly\Module\Custom
  * @since       0.0.1
@@ -13,19 +13,19 @@ namespace Deftly\Module\Custom;
 
 add_action( 'init', __NAMESPACE__ . '\register_custom_post_types' );
 /**
- * Register the custom FAQ post types.
+ * Register the custom post types hooked in with runtime config.
  *
  * @since 1.0.0
  *
  * @return void
  */
-function register_custom_post_types( $config ) {
-	$user_cpt_configs = $config;
+function register_custom_post_types() {
+	$user_cpt_configs = (array) apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return;
 	}
-	foreach ( $user_cpt_configs as $user_cpt_config ) {
-		register_custom_post_type( $user_cpt_config );
+	foreach ( $user_cpt_configs as $post_type => $user_cpt_config ) {
+		register_custom_post_type( $post_type, $user_cpt_config );
 	}
 }
 
@@ -34,23 +34,19 @@ function register_custom_post_types( $config ) {
  *
  * @since   0.0.1
  *
+ * @param   string  $post_type
  * @param   array   $user_cpt_config
  */
-function register_custom_post_type( $user_cpt_config ) {
+function register_custom_post_type( $post_type, array $user_cpt_config ) {
 
-	$custom_post_type = $user_cpt_config['labels']['slug'];
-	$is_user_cpt_hierarchical =  $user_cpt_config['args']['hierarchical'];
+	$config_args = $user_cpt_config['args'];
 	$user_features = $user_cpt_config['features'];
 
-	if ( $is_user_cpt_hierarchical ) {
-		$user_features['base_post-type'] = 'page';
+	if ( $config_args['hierarchical'] ) {
+		$user_features['base_post_type'] = 'page';
 	}
 
-	$features = generate_all_post_type_features(
-		$user_features['excluded_features'],
-		$user_features['additional_features'],
-		$user_features['base_post_type']
-	);
+	$features = generate_all_post_type_features( $user_features['excluded_features'], $user_features['additional_features'], $user_features['base_post_type'] );
 
 	$labels = post_type_label_config( $user_cpt_config['labels'] );
 
@@ -59,8 +55,8 @@ function register_custom_post_type( $user_cpt_config ) {
 		'labels'    => $labels,
 	];
 
-	$args = array_merge( $args, $user_cpt_config['args'] );
-	register_post_type( $custom_post_type, $args );
+	$args = array_merge( $args, $config_args );
+	register_post_type( $post_type, $args );
 }
 
 /**
@@ -74,23 +70,23 @@ function register_custom_post_type( $user_cpt_config ) {
  *
  * @return 	array
  */
-function generate_all_post_type_features( $excluded_features = array(), $additional_features, $post_type = 'post' ) {
+function generate_all_post_type_features( $excluded_features = array(), $additional_features = array(), $post_type = 'post' ) {
 	$base_post_type_features = array_keys( get_all_post_type_supports( $post_type ) );
 	if ( ! $excluded_features && ! $additional_features ) {
 		return $base_post_type_features;
 	}
 
-	$user_configured_features = $base_post_type_features;
+	$features = $base_post_type_features;
 
 	if ( $excluded_features ) {
-		$user_configured_features = array_diff( $base_post_type_features, $excluded_features );
+		$features = array_diff( $features, $excluded_features );
 	}
 
 	if ( $additional_features ) {
-		$user_configured_features  = array_merge( $user_configured_features, $additional_features );
+		$features  = array_merge( $features, $additional_features );
 	}
 
-	return $user_configured_features ;
+	return $features ;
 }
 
 /**
@@ -155,7 +151,9 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  * @return 	array 	$messages   Amended post update messages with new CPT update messages.
  */
 function update_custom_post_type_messages( $messages ) {
-	$user_cpt_configs = custom_post_type_configs();
+
+	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
+
 	if ( ! $user_cpt_configs ) {
 		return $messages;
 	}
@@ -225,7 +223,8 @@ add_filter( 'bulk_post_updated_messages', __NAMESPACE__ . '\update_custom_post_t
  * @return mixed
  */
 function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
-	$user_cpt_configs = custom_post_type_configs();
+
+	$user_cpt_configs = (array) apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return $bulk_messages;
 	}
@@ -253,9 +252,9 @@ function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
 			'trashed'   => _n( "%s {$post_type_name} moved to the Trash.", "%s {$post_type_plural_name} moved to the Trash.", $bulk_counts["trashed"], $text_domain ),
 			'untrashed' => _n( "%s {$post_type_name} restored from the Trash.", "%s {$post_type_plural_name} restored from the Trash.", $bulk_counts["untrashed"], $text_domain ),
 		);
-
-		return $bulk_messages;
 	}
+
+	return $bulk_messages;
 }
 
 add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder');
@@ -269,10 +268,11 @@ add_filter( 'enter_title_here', __NAMESPACE__ . '\change_add_title_placeholder')
  * @return  string   $title  placeholder text
  */
 function change_add_title_placeholder( $title ) {
-	$user_cpt_configs = custom_post_type_configs();
+	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return $title;
 	}
+
 	$screen     = get_current_screen();
 	$post_type  = $screen->post_type;
 
@@ -299,7 +299,7 @@ add_action('admin_head', __NAMESPACE__ . '\add_help_tab_to_custom_post_type');
  * @return 	void
  */
 function add_help_tab_to_custom_post_type() {
-	$user_cpt_configs = custom_post_type_configs();
+	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return;
 	}

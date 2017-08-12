@@ -24,10 +24,8 @@ define( 'CUSTOM_MODULE_DIR', __DIR__ );
  */
 function autoload() {
 	$files = [
-//		'shortcode.php',
 		'taxonomy.php',
 		'post-type.php',
-		'custom_configs.php',
 	];
 
 	foreach( $files as $file ) {
