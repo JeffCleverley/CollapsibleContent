@@ -24,10 +24,13 @@ return array(
 			'menu_icon'         => 'dashicons-editor-help',
 			'description'       => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 			'public'            => true,
-			'page_attributes'   => true,
 			'has_archive'  		=> true,
 			'menu_position'		=> 5,
 			'show_in_rest'      => true,
+			'taxonomies'        => array(
+				'category',
+				'post_tag',
+			),
 		),
 		'features'  =>  array(
 			'base_post_type'        => 'post',
@@ -65,21 +68,25 @@ return array(
 			'title_placeholder' => '',
 		),
 		'args'  => array(
-			'menu_icon'         => 'dashicons-editor-help',
+			'menu_icon'         => 'dashicons-welcome-learn-more',
 			'description'       => 'Frequently Asked Questions - provide your users with quick and easy to answers to the most commonly asked questions.',
 			'public'            => true,
 			'has_archive'  		=> true,
 			'menu_position'		=> 5,
+			'taxonomies'        => array(
+				'category',
+				'post_tag',
+				'topic',
+			),
 		),
-		'excluded_features' => array(
-			'excerpt',
-			'comments',
-			'trackbacks',
-			'custom-fields',
-			'thumbnail',
-		),
-		'supported_features' => array(
-			'page_attributes',
+		'features'  =>  array(
+			'base_post_type'        => 'post',
+			'excluded_features'     => array(
+				'excerpt',
+				'comments',
+				'trackbacks',
+			),
+			'additional_features'   => array( ),
 		),
 		'help'              => array(),
 	], // End of post type config.

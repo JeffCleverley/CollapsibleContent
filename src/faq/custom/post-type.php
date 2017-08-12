@@ -26,7 +26,5 @@ function register_faq_custom_post_type() {
 		return;
 	}
 
-//	ddd( $config);
-
 	\Deftly\Module\Custom\register_custom_post_types( $config );
 }

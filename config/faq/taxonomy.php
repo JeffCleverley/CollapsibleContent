@@ -42,8 +42,6 @@ return array(
 			'show_admin_column'     => true,
 			'show_in_rest'          => false,
 		),
-		'post_types'    => array(
-			'faq',
-		)
+		'post_types'    => array(),
 	], // End of taxonomy config.
 );
