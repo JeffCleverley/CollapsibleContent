@@ -61,7 +61,10 @@ function register_custom_post_type( $post_type, array $user_cpt_config ) {
 	);
 	$args['supports'] = $features;
 
-	$labels = custom_label_generator( $user_cpt_config['labels'] );
+	$labels = custom_label_generator( $user_cpt_config, $user_features['base_post_type'] );
+
+//ddd($args);
+
 	$args['labels'] = $labels;
 
 	register_post_type( $post_type, $args );

@@ -52,8 +52,7 @@ function register_custom_taxonomies( $config ) {
  */
 function register_custom_taxonomy( $taxonomy, array $config ) {
 	$args = $config['args'];
-	$args['labels'] = taxonomy_label_config( $config['labels'] );
-
+	$args['labels'] = custom_label_generator( $config, 'taxonomy' );
 	register_taxonomy( $taxonomy, $config['post_types'], $args );
 }
 
