@@ -15,6 +15,7 @@ return array(
 		'singular_name'         => 'Topic',
 		'plural_name'           => 'Topics',
 		'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
+		'specific_labels'       => array(),
 	),
 	'args'  => array(
 		'public'                => true,

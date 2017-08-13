@@ -18,6 +18,7 @@ return [
 		'lowercase_in_sentence' => false,
 		'text_domain'           => FAQ_MODULE_TEXT_DOMAIN,
 		'title_placeholder'     => 'Enter a title for your FAQ here...',
+		'specific_labels'       => array(),
 	),
 	'args'  => array(
 		'menu_icon'         => 'dashicons-editor-help',

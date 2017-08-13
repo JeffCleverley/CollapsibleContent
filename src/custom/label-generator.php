@@ -26,6 +26,11 @@ namespace Deftly\Module\Custom;
  */
 function custom_label_generator( array $config, $custom_type = 'post' ) {
 
+	$config['labels'] = array_merge(
+		array( 'specific_labels'=> array() ),
+		$config['labels']
+	);
+
 	$config['labels']['in_sentence_singular'] = $config['labels']['singular_name'];
 	$config['labels']['in_sentence_plural'] = $config['labels']['plural_name'];
 	if ( $config['labels']['lowercase_in_sentence'] ) {
@@ -49,6 +54,11 @@ function custom_label_generator( array $config, $custom_type = 'post' ) {
 		: 'Deftly\Module\Custom\generate_custom_labels_for_taxonomies';
 
 	$labels = array_merge( $labels, $custom_type_generator( $config ) );
+
+	if ( $config['labels']['specific_labels'] ) {
+		$labels = array_merge( $labels, $config['labels']['specific_labels'] );
+	}
+
 	return $labels;
 }
 
