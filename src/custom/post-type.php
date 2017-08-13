@@ -62,9 +62,6 @@ function register_custom_post_type( $post_type, array $user_cpt_config ) {
 	$args['supports'] = $features;
 
 	$labels = custom_label_generator( $user_cpt_config, $user_features['base_post_type'] );
-
-//ddd($args);
-
 	$args['labels'] = $labels;
 
 	register_post_type( $post_type, $args );
@@ -89,7 +86,6 @@ function generate_all_post_type_features( $excluded_features = array(), $additio
 	}
 
 	$features = $base_post_type_features;
-
 	if ( $excluded_features ) {
 		$features = array_diff( $features, $excluded_features );
 	}
@@ -112,7 +108,7 @@ add_filter( 'post_updated_messages', __NAMESPACE__ . '\update_custom_post_type_m
  *
  * @return 	array 	$messages   Amended post update messages with new CPT update messages.
  */
-function update_custom_post_type_messages( $messages ) {
+function update_custom_post_type_messages( array $messages ) {
 	/*
 	 * Add custom post type runtime configurations from generating and registering
 	 * each with WordPress
@@ -127,53 +123,61 @@ function update_custom_post_type_messages( $messages ) {
 		return $messages;
 	}
 
-	$post       = get_post();
-	$post_type  = get_post_type( $post );
-	$slug_array = array();
-	foreach ($user_cpt_configs as $user_cpt_config) {
-		$slug_array[] = $user_cpt_config['labels']['slug'];
-	}
-	if ( ! in_array( $post_type, $slug_array ) ) {
-		return $messages;
-	}
-
 	foreach ( $user_cpt_configs as $key => $user_cpt_config ) {
-		$post_type_object   =   get_post_type_object( $post_type );
-		$post_type_labels   =   $post_type_object->labels;
-		$post_type_name     =   $post_type_labels->singular_name;
-		$text_domain        =   $user_cpt_config['labels']['text_domain'];
-
-		$messages[ $post_type ] = [
-			0   =>  '', // Unused. Messages start at index 1.
-			1   =>   __( "{$post_type_name} updated.", $text_domain ),
-			2   =>  __( 'Custom field updated.', $text_domain ),
-			3   =>  __( 'Custom field deleted.', $text_domain ),
-			4   =>  __( "{$post_type_name} updated.", $text_domain ),
-			/* translators: %s: date and time of the revision */
-			5   =>  isset( $_GET['revision'] ) ? sprintf( __( "{$post_type_name} restored to revision from %s", $text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6   =>  __( "{$post_type_name} published.", $text_domain ),
-			7   =>  __( "{$post_type_name} saved.", $text_domain ),
-			8   =>  __( "{$post_type_name} submitted.", $text_domain ),
-			9   =>  sprintf(
-					__( $post_type_name . ' scheduled for: <strong>%1$s</strong>.', $text_domain ),
-					// translators: Publish box date format, see http://php.net/date
-					date_i18n( __( 'M j, Y @ G:i', $text_domain ), strtotime( $post->post_date ) )
-					),
-			10  =>  __( "{$post_type_name} draft updated.", $text_domain )
-		];
-
-		if ( $post_type_object->publicly_queryable ) {
-			$permalink  =   get_permalink( $post->ID );
-			$view_link  =   sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( "View {$post_type_name}", $text_domain ) );
-			$messages[ $post_type ][1]  .=  $view_link;
-			$messages[ $post_type ][6]  .=  $view_link;
-			$messages[ $post_type ][9]  .=  $view_link;
-
-			$preview_permalink  =   add_query_arg( 'preview', 'true', $permalink );
-			$preview_link       =   sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( "Preview {$post_type_name}", $text_domain ) );
-			$messages[ $post_type ][8]  .=  $preview_link;
-			$messages[ $post_type ][10] .=  $preview_link;
+		$post = get_post();
+		$post_type = get_post_type( $post );
+		if ( $post_type != $key ) {
+			continue;
 		}
+		$messages = generate_messages_for_post_type( $key, $user_cpt_config, $post );
+	}
+	return $messages;
+}
+
+/**
+ * Generate the messages for each post type.
+ *
+ * @since   0.0.1
+ *
+ * @param   string      $key                Post type slug
+ * @param   array       $user_cpt_config    User configurations
+ * @param   \WP_Post    $post               Post Object
+ *
+ * @return mixed
+ */
+function generate_messages_for_post_type( $key, array $user_cpt_config, \WP_post $post ) {
+
+	$messages[ $key ] = [
+		0   =>  '', // Unused. Messages start at index 1.
+		1   =>   __( "{$user_cpt_config['labels']['singular_name']} updated.", $user_cpt_config['labels']['text_domain'] ),
+		2   =>  __( 'Custom field updated.', $user_cpt_config['labels']['text_domain'] ),
+		3   =>  __( 'Custom field deleted.', $user_cpt_config['labels']['text_domain'] ),
+		4   =>  __( "{$user_cpt_config['labels']['singular_name']} updated.", $user_cpt_config['labels']['text_domain'] ),
+		/* translators: %s: date and time of the revision */
+		5   =>  isset( $_GET['revision'] ) ? sprintf( __( "{$user_cpt_config['labels']['singular_name']} restored to revision from %s", $user_cpt_config['labels']['text_domain'] ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+		6   =>  __( "{$user_cpt_config['labels']['singular_name']} published.", $user_cpt_config['labels']['text_domain'] ),
+		7   =>  __( "{$user_cpt_config['labels']['singular_name']} saved.", $user_cpt_config['labels']['text_domain'] ),
+		8   =>  __( "{$user_cpt_config['labels']['singular_name']} submitted.", $user_cpt_config['labels']['text_domain'] ),
+		9   =>  sprintf(
+			__( $user_cpt_config['labels']['singular_name'] . ' scheduled for: <strong>%1$s</strong>.', $user_cpt_config['labels']['text_domain'] ),
+			// translators: Publish box date format, see http://php.net/date
+			date_i18n( __( 'M j, Y @ G:i', $user_cpt_config['labels']['text_domain'] ), strtotime( $post->post_date ) )
+		),
+		10  =>  __( "{$user_cpt_config['labels']['singular_name']} draft updated.", $user_cpt_config['labels']['text_domain'] )
+	];
+
+	$post_type_object = get_post_type_object( $key );
+	if ( $post_type_object->publicly_queryable ) {
+		$permalink  =   get_permalink( $post->ID );
+		$view_link  =   sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( "View {$user_cpt_config['labels']['singular_name']}", $user_cpt_config['labels']['text_domain'] ) );
+		$messages[ $key ][1]  .=  $view_link;
+		$messages[ $key ][6]  .=  $view_link;
+		$messages[ $key ][9]  .=  $view_link;
+
+		$preview_permalink  =   add_query_arg( 'preview', 'true', $permalink );
+		$preview_link       =   sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( "Preview {$user_cpt_config['labels']['singular_name']}", $user_cpt_config['labels']['text_domain'] ) );
+		$messages[ $key ][8]  .=  $preview_link;
+		$messages[ $key ][10] .=  $preview_link;
 	}
 	return $messages;
 }
@@ -200,36 +204,42 @@ function update_custom_post_type_bulk_messages( $bulk_messages, $bulk_counts ) {
 	 *
 	 * @param   array   Array of configurations
 	 */
-	$user_cpt_configs = (array) apply_filters( 'add_custom_post_type_runtime_config', array() );
+	$user_cpt_configs = apply_filters( 'add_custom_post_type_runtime_config', array() );
 	if ( ! $user_cpt_configs ) {
 		return $bulk_messages;
 	}
 
-	$post      = get_post();
-	$post_type = get_post_type( $post );
-	foreach ( $user_cpt_configs as $user_cpt_config ) {
-		$slug_array[] = $user_cpt_config['labels']['slug'];
-	}
-	if ( ! in_array( $post_type, $slug_array ) ) {
-		return $bulk_messages;
-	}
-
 	foreach ( $user_cpt_configs as $key => $user_cpt_config ) {
-		$post_type_object      = get_post_type_object( $post_type );
-		$post_type_labels      = $post_type_object->labels;
-		$post_type_name        = $post_type_labels->singular_name;
-		$post_type_plural_name = $post_type_labels->plural_name;
-		$text_domain           = $user_cpt_config['labels']['text_domain'];
-
-		$bulk_messages[ $post_type ] = array(
-			'updated'   => _n( "%s {$post_type_name} updated.", "%s {$post_type_plural_name} updated.", $bulk_counts["updated"], $text_domain ),
-			'locked'    => _n( "%s {$post_type_name} not updated, somebody is editing it.", "%s {$post_type_plural_name} not updated, somebody is editing them.", $bulk_counts["locked"], $text_domain ),
-			'deleted'   => _n( "%s {$post_type_name} permanently deleted.", "%s {$post_type_plural_name} permanently deleted.", $bulk_counts["deleted"], $text_domain ),
-			'trashed'   => _n( "%s {$post_type_name} moved to the Trash.", "%s {$post_type_plural_name} moved to the Trash.", $bulk_counts["trashed"], $text_domain ),
-			'untrashed' => _n( "%s {$post_type_name} restored from the Trash.", "%s {$post_type_plural_name} restored from the Trash.", $bulk_counts["untrashed"], $text_domain ),
-		);
+		$post_type = get_post_type( get_post() );
+		if ( $post_type != $key ) {
+			continue;
+		}
+		$bulk_messages = generate_bulk_messages_for_post_type( $key, $user_cpt_config, $bulk_counts );
 	}
 
+	return $bulk_messages;
+}
+
+/**
+ * Generate bulk messages for each post type.
+ *
+ * @since   0.0.1
+ *
+ * @param   string  $key
+ * @param   array   $user_cpt_config
+ * @param   array   $bulk_counts
+ *
+ * @return mixed
+ */
+function generate_bulk_messages_for_post_type( $key, array $user_cpt_config, array $bulk_counts ) {
+
+		$bulk_messages[ $key ] = array(
+			'updated'   => _n( "%s {$user_cpt_config['labels']['singular_name']} updated.", "%s {$user_cpt_config['labels']['plural']} updated.", $bulk_counts["updated"], $user_cpt_config['labels']['text_domain'] ),
+			'locked'    => _n( "%s {$user_cpt_config['labels']['singular_name']} not updated, somebody is editing it.", "%s {$user_cpt_config['labels']['plural']} not updated, somebody is editing them.", $bulk_counts["locked"], $user_cpt_config['labels']['text_domain'] ),
+			'deleted'   => _n( "%s {$user_cpt_config['labels']['singular_name']} permanently deleted.", "%s {$user_cpt_config['labels']['plural']} permanently deleted.", $bulk_counts["deleted"], $user_cpt_config['labels']['text_domain'] ),
+			'trashed'   => _n( "%s {$user_cpt_config['labels']['singular_name']} moved to the Trash.", "%s {$user_cpt_config['labels']['plural']} moved to the Trash.", $bulk_counts["trashed"], $user_cpt_config['labels']['text_domain'] ),
+			'untrashed' => _n( "%s {$user_cpt_config['labels']['singular_name']} restored from the Trash.", "%s {$user_cpt_config['labels']['plural']} restored from the Trash.", $bulk_counts["untrashed"], $user_cpt_config['labels']['text_domain'] ),
+		);
 	return $bulk_messages;
 }
 
@@ -261,12 +271,17 @@ function change_add_title_placeholder( $title ) {
 	$post_type  = $screen->post_type;
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
-		if ( $user_cpt_config['labels']['slug'] == $post_type && ! $user_cpt_config['labels']['title_placeholder'] ) {
-			$title = "Enter a new {$user_cpt_config['labels']['singular_name']} title here...";
-		} elseif ( $user_cpt_config['labels']['slug'] == $post_type && $user_cpt_config['labels']['title_placeholder']) {
-			$title = $user_cpt_config['labels']['title_placeholder'];
+
+		if ( $key != $post_type ) {
+			continue;
 		}
+
+		$user_cpt_config['labels']['title_placeholder'] == 0
+			? $title = "Enter a new {$user_cpt_config['labels']['singular_name']} title here..."
+			: $title = $user_cpt_config['labels']['title_placeholder'];
+
 	}
+
 	return $title;
 };
 
@@ -301,8 +316,8 @@ function add_help_tab_to_custom_post_type() {
 
 	foreach( $user_cpt_configs as $key => $user_cpt_config ) {
 		$user_help_configs = $user_cpt_config['help'];
-		$configs_array_to_test_if_empty = array_filter( $user_help_configs );
-		if ( empty( $configs_array_to_test_if_empty ) ) {
+		$array_to_test_if_configs_empty = array_filter( $user_help_configs );
+		if ( empty( $array_to_test_if_configs_empty ) ) {
 			continue;
 		}
 		if ( $user_cpt_config['labels']['slug'] == $post_type ) {
@@ -314,22 +329,15 @@ function add_help_tab_to_custom_post_type() {
 /**
  * Generate the content for the help tab
  *
- * @param $user_help_configs
- * @param $user_cpt_config
- * @param $screen
+ * @param   array   $user_help_configs
+ * @param   array   $user_cpt_config
+ * @param   string  $screen
  *
  * @return void
  */
-function generate_help_tab_content( $user_help_configs, $user_cpt_config, $screen ) {
+function generate_help_tab_content( array $user_help_configs, array $user_cpt_config, $screen ) {
 	foreach ($user_help_configs as $user_help_config) {
-		$help_content = load_help_content(
-			$user_cpt_config['labels']['slug'],
-			$user_cpt_config['labels']['singular_name'],
-			$user_cpt_config['labels']['text_domain'],
-			$user_help_config['help_title'],
-			$user_help_config['help_content'],
-			$user_help_config['help_link']
-		);
+		$help_content = load_help_content( $user_cpt_config, $user_help_config );
 		$config = array(
 			'id'      => "{$user_help_config['help_tab_id']}",
 			'title'   => "{$user_help_config['help_title']}",
@@ -344,22 +352,22 @@ function generate_help_tab_content( $user_help_configs, $user_cpt_config, $scree
  *
  * Loads html from separate views - remember to make them!
  *
- * @param   string  $custom_post_type       The custom post type slug from the add_help_text_to_custom_post_type() above.
- * @param   string  $custom_post_type_name  The custom post type singular name from the add_help_text_to_custom_post_type() above.
+ * @param   array  $user_cpt_config        The custom post type slug from the add_help_text_to_custom_post_type() above.
+ * @param   array  $user_help_config       The custom post type singular name from the add_help_text_to_custom_post_type() above.
  * @parem   string  $text_domain            Text domain for internationalisation.
  *
  * @since 	0.0.1
  *
  * @return 	string 	$help_content 	HTML and Text from help view
  */
-function load_help_content( $custom_post_type, $custom_post_type_name, $text_domain, $help_title, $help_content, $help_link ) {
-	$obj = get_post_type_object( $custom_post_type );
+function load_help_content( array $user_cpt_config, array $user_help_config ) {
+	$obj = get_post_type_object( $user_cpt_config['labels']['slug'] );
 	$description = esc_html( $obj->description );
-	$help_top_header        = __("{$help_title}", $text_domain );
-	$help_description       = __( $description, $text_domain );
-	$help_content           = __( $help_content, $text_domain );
-	$more_information_header = __('For more information:', $text_domain );
-	$help_link = __('<a href="' . $help_link . '" target="_blank">' . $custom_post_type_name . ' Module Documentation</a>', $text_domain );
+	$help_top_header        = __( $user_help_config['help_title'], $user_cpt_config['labels']['text_domain'] );
+	$help_description       = __( $description, $user_cpt_config['labels']['text_domain'] );
+	$help_content           = __( $user_help_config['help_content'], $user_cpt_config['labels']['text_domain'] );
+	$more_information_header = __('For more information:', $user_cpt_config['labels']['text_domain'] );
+	$help_link = __('<a href="' . $user_help_config['help_link'] . '" target="_blank">' . $user_cpt_config['labels']['singular_name'] . ' Module Documentation</a>', $user_cpt_config['labels']['text_domain'] );
 
 	ob_start();
 	include( dirname( __FILE__ ) . "/views/help-view.php" );

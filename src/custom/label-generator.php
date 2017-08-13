@@ -19,97 +19,100 @@ namespace Deftly\Module\Custom;
  *
  * @since 	0.0.1
  *
- * @param $config
- * @param string $custom_type
+ * @param   array   $config
+ * @param   string  $custom_type
  *
- * @return array
+ * @return  array   $labels
  */
-function custom_label_generator( $config, $custom_type = '' ) {
-	$plural_label = $config['labels']['plural_name'];
-	$singular_label = $config['labels']['singular_name'];
-	$post_type = $config['labels']['slug'];
-	$text_domain = $config['labels']['text_domain'];
-	$in_sentence_singular = $singular_label;
-	$in_sentence_plural = $plural_label;
+function custom_label_generator( array $config, $custom_type = 'post' ) {
 
+	$config['labels']['in_sentence_singular'] = $config['labels']['singular_name'];
+	$config['labels']['in_sentence_plural'] = $config['labels']['plural_name'];
 	if ( $config['labels']['lowercase_in_sentence'] ) {
-		$in_sentence_singular = mb_strtolower( $singular_label, 'UTF-8' );
-		$in_sentence_plural = mb_strtolower( $plural_label, 'UTF-8' );
+		$config['labels']['in_sentence_singular'] = mb_strtolower( $config['labels']['singular_name'], 'UTF-8' );
+		$config['labels']['in_sentence_plural'] = mb_strtolower( $config['labels']['plural_name'], 'UTF-8' );
 	}
 
-	$labels_for_all = [
-		'name'                  => _x( $plural_label, "{$custom_type} general name", $text_domain ),
-		'singular_name'      	=> _x( $singular_label, "{$custom_type} singular name", $text_domain ),
-		'add_new_item'       	=> __( "Add New {$singular_label}", $text_domain ),
-		'edit_item'             => __( "Edit {$singular_label}", $text_domain ),
-		'view_item'          	=> __( "View {$singular_label}", $text_domain ),
-		'all_items'          	=> __( "All {$plural_label}", $text_domain ),
-		'search_items'       	=> __( "Search {$in_sentence_plural}", $text_domain ),
-		'not_found'          	=> __( "No {$in_sentence_plural} found.", $text_domain ),
+	$labels = [
+		'name'                  => _x( $config['labels']['plural_name'], "{$custom_type} general name", $config['labels']['text_domain'] ),
+		'singular_name'      	=> _x( $config['labels']['singular_name'], "{$custom_type} singular name", $config['labels']['text_domain'] ),
+		'add_new_item'       	=> __( "Add New {$config['labels']['singular_name']}", $config['labels']['text_domain'] ),
+		'edit_item'             => __( "Edit {$config['labels']['singular_name']}", $config['labels']['text_domain'] ),
+		'view_item'          	=> __( "View {$config['labels']['singular_name']}", $config['labels']['text_domain'] ),
+		'all_items'          	=> __( "All {$config['labels']['plural_name']}", $config['labels']['text_domain'] ),
+		'search_items'       	=> __( "Search {$config['labels']['in_sentence_plural']}", $config['labels']['text_domain'] ),
+		'not_found'          	=> __( "No {$config['labels']['in_sentence_plural']} found.", $config['labels']['text_domain'] ),
+	];
+
+	$custom_type_generator = $custom_type == 'post' || 'page'
+		? 'Deftly\Module\Custom\generate_custom_labels_for_post_types'
+		: 'Deftly\Module\Custom\generate_custom_labels_for_taxonomies';
+
+	$labels = array_merge( $labels, $custom_type_generator( $config ) );
+	return $labels;
+}
+
+/**
+ * Generate labels for post types.
+ *
+ * @since   0.0.1
+ *
+ * @param   array   $config
+ *
+ * @return  array
+ */
+function generate_custom_labels_for_post_types( array $config ) {
+	return [
+		'name_admin_bar'   	    => _x( $config['labels']['singular_name'], 'add new on admin bar', $config['labels']['text_domain'] ),
+		'add_new'      	        => _x( "Add New {$config['labels']['singular_name']}", $config['features']['base_post_type'], $config['labels']['text_domain'] ),
+		'new_item'           	=> __( "New {$config['labels']['singular_name']}", $config['labels']['text_domain'] ),
+		'view_items'          	=> __( "View {$config['labels']['plural_name']}", $config['labels']['text_domain'] ),
+		'archives'      	    => __( "{$config['labels']['singular_name']} Archives", $config['labels']['text_domain'] ),
+		'attributes'          	=> __( "{$config['labels']['singular_name']} Attributes", $config['labels']['text_domain'] ),
+		'insert_into_item'      => __( "Insert in to {$config['labels']['in_sentence_singular']}", $config['labels']['text_domain'] ),
+		'uploaded_to_this_item' => __( "Uploaded to this {$config['labels']['in_sentence_singular']}", $config['labels']['text_domain'] ),
+		'parent_item_colon'	    => __( "Parent {$config['labels']['in_sentence_plural']}:", $config['labels']['text_domain'] ),
+		'not_found_in_trash' 	=> __( "No {$config['labels']['in_sentence_plural']} found in Trash.", $config['labels']['text_domain'] ),
+		'featured_image'        => __( "{$config['labels']['singular_name']} Image", $config['labels']['text_domain'] ),
+		'set_featured_image'    => __( "Set {$config['labels']['in_sentence_singular']} image", $config['labels']['text_domain'] ),
+		'remove_featured_image' => __( "Remove {$config['labels']['in_sentence_singular']} image", $config['labels']['text_domain'] ),
+		'use_featured_image'    => __( "Use {$config['labels']['in_sentence_singular']} image", $config['labels']['text_domain'] ),
+	];
+}
+
+/**
+ * Generate labels for taxonomies.
+ *
+ * @since   0.0.1
+ *
+ * @param   array   $config
+ *
+ * @return  array   $labels
+ */
+function generate_custom_labels_for_taxonomies( array $config ){
+
+	$labels = [
+		'update_item'      => __( "Update {$config['labels']['singular_name']}", $config['labels']['text_domain'] ),
+		'new_item_name'    => __( "New {$config['labels']['in_sentence_singular']} Name", $config['labels']['text_domain'] ),
+	];
+
+	if ( ! $config['args']['hierarchical'] ) {
+		$non_hierarchical_only_labels = [
+			'popular_items'                 =>  __( "Most popular {$config['labels']['plural_name']}", $config['labels']['text_domain'] ),
+			'separate_items_with_commas'    =>  __( "Separate {$config['labels']['plural_name']} with commas", $config['labels']['text_domain'] ),
+			'add_or_remove_items'           =>  __( "Add or remove {$config['labels']['plural_name']}", $config['labels']['text_domain'] ),
+			'choose_from_most_used'         =>  __( "Choose from the most used {$config['labels']['plural_name']}", $config['labels']['text_domain'] ),
 		];
-
-	$post_type_only_labels = [
-		'name_admin_bar'   	    => _x( $singular_label, 'add new on admin bar', $text_domain ),
-		'add_new'      	        => _x( "Add New {$singular_label}", $post_type, $text_domain ),
-		'new_item'           	=> __( "New {$singular_label}", $text_domain ),
-		'view_items'          	=> __( "View {$plural_label}", $text_domain ),
-		'archives'      	    => __( "{$singular_label} Archives", $text_domain ),
-		'attributes'          	=> __( "{$singular_label} Attributes", $text_domain ),
-		'insert_into_item'      => __( "Insert in to {$in_sentence_singular}", $text_domain ),
-		'uploaded_to_this_item' => __( "Uploaded to this {$in_sentence_singular}", $text_domain ),
-		'parent_item_colon'	    => __( "Parent {$in_sentence_plural}:", $text_domain ),
-		'not_found_in_trash' 	=> __( "No {$in_sentence_plural} found in Trash.", $text_domain ),
-		'featured_image'        => __( "{$singular_label} Image", $text_domain ),
-		'set_featured_image'    => __( "Set {$in_sentence_singular} image", $text_domain ),
-		'remove_featured_image' => __( "Remove {$in_sentence_singular} image", $text_domain ),
-		'use_featured_image'    => __( "Use {$in_sentence_singular} image", $text_domain ),
-	];
-
-	$post_type_and_hierarchical_taxonomy_labels = [
-		'parent_item_colon' => __( "Parent {$singular_label}: ", $text_domain),
-	];
-
-	$either_taxonomy_only_labels = [
-		'update_item'      => __( "Update {$singular_label}", $text_domain ),
-		'new_item_name'    => __( "New {$in_sentence_singular} Name", $text_domain ),
-	];
-
-	$non_hierarchical_taxonomy_only_labels = [
-		'popular_items'                 =>  __( "Most popular {$plural_label}", $text_domain ),
-		'separate_items_with_commas'    =>  __( "Separate {$plural_label} with commas", $text_domain ),
-		'add_or_remove_items'           =>  __( "Add or remove {$plural_label}", $text_domain ),
-		'choose_from_most_used'         =>  __( "Choose from the most used {$plural_label}", $text_domain ),
-	];
-
-	$hierarchical_taxonomy_only_labels = [
-		'parent_item'   =>  __( "Parent {$singular_label}", $text_domain),
-	];
-
-	if ( $custom_type == 'post' || $custom_type == 'page' ) {
-		$post_type_labels = array_merge(
-			$labels_for_all,
-			$post_type_only_labels,
-			$post_type_and_hierarchical_taxonomy_labels
-		);
-		return $post_type_labels;
+		$labels = array_merge( $labels, $non_hierarchical_only_labels );
 	}
 
-	if ( $custom_type == 'taxonomy' && $config['args']['hierarchical'] ) {
-		$hierarchical_taxonomy_labels = array_merge(
-			$labels_for_all,
-			$post_type_and_hierarchical_taxonomy_labels,
-			$either_taxonomy_only_labels,
-			$hierarchical_taxonomy_only_labels
-		);
-		return $hierarchical_taxonomy_labels;
+	if ( $config['args']['hierarchical'] ) {
+		$hierarchical_only_labels = [
+			'parent_item'   =>  __( "Parent {$config['labels']['singular_name']}", $config['labels']['text_domain']),
+			'parent_item_colon' => __( "Parent {$config['labels']['singular_name']}: ", $config['labels']['text_domain']),
+		];
+		$labels = array_merge( $labels, $hierarchical_only_labels );
 	}
 
-	if ( $custom_type == 'taxonomy' && ! $config['args']['hierarchical'] ) {
-		$hierarchical_taxonomy_labels = array_merge(
-			$labels_for_all,
-			$either_taxonomy_only_labels,
-			$non_hierarchical_taxonomy_only_labels
-		);
-		return $hierarchical_taxonomy_labels;
-	}
+	return $labels;
 }

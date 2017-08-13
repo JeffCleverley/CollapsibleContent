@@ -19,17 +19,11 @@ add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_f
  *
  * @param   array   $configs    Array of all the custom post type configurations for this module.
  *
- * @return  void
+ * @return  array   $configs
  */
 function register_faq_custom_post_type( array $configs ) {
 	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/faq-post-type.php');
-
-	if ( ! $config ) {
-		return;
-	}
-
 	$configs[ $config['labels']['slug'] ] = $config;
-
 	return $configs;
 }
 
@@ -41,17 +35,11 @@ add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_p
  *
  * @param   array   $configs    Array of all the custom post type configurations for this module.
  *
- * @return  void
+ * @return  array   $configs
  */
 function register_portfolio_custom_post_type( array $configs ) {
 	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/portfolio-post-type.php');
-
-	if ( ! $config ) {
-		return;
-	}
-
 	$configs[ $config['labels']['slug'] ] = $config;
-
 	return $configs;
 }
 
