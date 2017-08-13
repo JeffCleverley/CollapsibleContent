@@ -11,30 +11,23 @@
  */
 namespace Deftly\Module\FAQ\Custom;
 
-add_action( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq_topic_taxonomy' );
+//add_action( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq_topic_taxonomy' );
 /**
  * Register the custom FAQ taxonomies.
  *
  * @since   0.0.1
  *
- * @return  array   $configs
+ * @param array $configs
+ *
+ * @return array $configs
  */
-function register_faq_topic_taxonomy() {
-	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/topic-taxonomy.php' );
-	$configs[ $config['labels']['slug'] ] = $config;
+function register_faq_topic_taxonomy( array $configs) {
+	$configurations = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/taxonomy.php' );
+
+	foreach ( $configurations as $config ) {
+		$configs[ $config['labels']['slug'] ] = $config;
+	}
+
 	return $configs;
 }
 
-add_action( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq_theory_taxonomy' );
-/**
- * Register the custom FAQ taxonomies.
- *
- * @since   0.0.1
- *
- * @return  array   $configs
- */
-function register_faq_theory_taxonomy() {
-	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/theory-taxonomy.php' );
-	$configs[ $config['labels']['slug'] ] = $config;
-	return $configs;
-}

@@ -11,7 +11,7 @@
  */
 namespace Deftly\Module\FAQ\Custom;
 
-add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_faq_custom_post_type' );
+//add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_faq_custom_post_type' );
 /**
  * Register the custom FAQ post type from a config file.
  *
@@ -22,24 +22,11 @@ add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_f
  * @return  array   $configs
  */
 function register_faq_custom_post_type( array $configs ) {
-	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/faq-post-type.php');
-	$configs[ $config['labels']['slug'] ] = $config;
+	$configurations = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/post-type.php');
+
+	foreach ( $configurations as $config ) {
+		$configs[ $config['labels']['slug'] ] = $config;
+	}
+
 	return $configs;
 }
-
-add_filter( 'add_custom_post_type_runtime_config',  __NAMESPACE__ . '\register_portfolio_custom_post_type' );
-/**
- * Register the custom Portfolio post type from a config file.
- *
- * @since   1.0.0
- *
- * @param   array   $configs    Array of all the custom post type configurations for this module.
- *
- * @return  array   $configs
- */
-function register_portfolio_custom_post_type( array $configs ) {
-	$config = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/portfolio-post-type.php');
-	$configs[ $config['labels']['slug'] ] = $config;
-	return $configs;
-}
-
