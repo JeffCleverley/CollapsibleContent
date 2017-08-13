@@ -26,18 +26,19 @@ add_filter( 'archive_template', __NAMESPACE__ . '\load_the_faq_archive_template'
  * @return  string
  */
 function load_the_faq_archive_template( $archive_template ) {
-	$cpt_configs = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/post-type.php' );
+	$cpt_configs = include( FAQ_MODULE_DIR . '/config/custom/post-type.php' );
+
 	if ( ! $cpt_configs ) {
 		return $archive_template;
 	}
 
 	foreach ( $cpt_configs as $cpt_config ) {
-		if ( ! is_post_type_archive( $cpt_config['slug'] ) ) {
+		if ( ! is_post_type_archive( $cpt_config['labels']['slug'] ) ) {
 			return $archive_template;
 		}
 
-		$plugin_archive_template = __DIR__ . "/archive-{$cpt_config['slug']}.php";
-		$is_in_archive_template = strpos( $archive_template, "/archive-{$cpt_config['slug']}.php");
+		$plugin_archive_template = __DIR__ . "/archive-{$cpt_config['labels']['slug']}.php";
+		$is_in_archive_template = strpos( $archive_template, "/archive-{$cpt_config['labels']['slug']}.php");
 		if ( ! $archive_template || ! $is_in_archive_template ) {
 			return $plugin_archive_template;
 		}

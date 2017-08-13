@@ -13,7 +13,6 @@ namespace  Deftly\Module\FAQ\Templates;
 
 remove_action( 'genesis_loop', 'genesis_do_loop' );
 add_action( 'genesis_loop', __NAMESPACE__ . '\do_faq_archive_loop');
-
 /**
  * Do the FAQ Archive Loop and render out the HTML by loading appropriate view.
  *

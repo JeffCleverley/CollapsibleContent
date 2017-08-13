@@ -9,8 +9,9 @@
  * @license     GNU General Public License 2.0+
  *
  */
-return [
-	'topic' =>  array(
+return array (
+
+	[ // Beginning of single Taxonomy Configuration /////////////////////////
 		'labels'    => array(
 			'slug'                  => 'topic',
 			'singular_name'         => 'Topic',
@@ -26,10 +27,11 @@ return [
 			'show_in_rest'          => false,
 		),
 		'post_types'    => array(
-			'faq',
+			'custom',
 		)
-	),
-	'theory'    =>  array(
+	], // End of single Taxonomy Configuration ///////////////////////////////
+
+	[ // Beginning of single Taxonomy Configuration /////////////////////////
 		'labels'    => array(
 			'slug'                  => 'theory',
 			'singular_name'         => 'Theory',
@@ -44,8 +46,9 @@ return [
 			'show_in_rest'          => false,
 		),
 		'post_types'    => array(
-			'faq',
+			'custom',
 		),
-	),
-];
+	], // End of single Taxonomy Configuration ///////////////////////////////
+
+);
 

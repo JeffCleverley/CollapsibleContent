@@ -10,8 +10,9 @@
  *
  */
 
-return [
-	'faq' =>    array(
+return array(
+
+	[ // Beginning of single Post Type Configuration ///////////////////////////
 		'labels'    => array(
 			'slug'                  => 'faq',
 			'singular_name'         => 'FAQ',
@@ -47,20 +48,21 @@ return [
 		),
 		'help'                      => array(
 			array(
-				'help_tab_id'       => 'faq-help',
+				'help_tab_id'       => 'custom-help',
 				'help_title'        => 'FAQ Help',
 				'help_content'      => 'Some help content to helpfully help people who need help!',
 				'help_link'         => 'https://github.com/JeffCleverley/CollapsibleContent',
 			),
 			array(
-				'help_tab_id'       => 'faq-support',
+				'help_tab_id'       => 'custom-support',
 				'help_title'        => 'FAQ Support',
 				'help_content'      => 'Some support content to support those in need of support.',
 				'help_link'         => 'https://github.com/JeffCleverley/CollapsibleContent',
 			),
 		),
-	),
-	'portfolio' =>  array(
+	], // End of single Post Type Configuration ///////////////////////////////
+
+	[ // Beginning of single Post Type Configuration /////////////////////////
 		'labels'    => array(
 			'slug'                  => 'portfolio',
 			'singular_name'         => 'Portfolio',
@@ -101,5 +103,6 @@ return [
 				'help_link'         => 'https://github.com/JeffCleverley/CollapsibleContent',
 			),
 		),
-	),
-];
+	], // End of single Post Type Configuration ///////////////////////
+
+);

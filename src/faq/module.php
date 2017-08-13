@@ -34,10 +34,14 @@ function autoload() {
 }
 autoload();
 
+
+
 add_filter( 'add_custom_post_type_runtime_config', __NAMESPACE__ . '\register_faq_custom_configs' );
 add_filter( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq_custom_configs' );
 /**
- * Register the custom FAQ post type from a config file.
+ * Register the custom contents from a config file.
+ * Custom Post Types
+ * Custom Taxonomies
  *
  * @since   1.0.0
  *
@@ -48,7 +52,7 @@ add_filter( 'add_custom_taxonomy_runtime_config', __NAMESPACE__ . '\register_faq
 function register_faq_custom_configs( array $configs ) {
 	$doing_post_type = current_filter() == 'add_custom_post_type_runtime_config';
 	$filename = $doing_post_type ? 'post-type' : 'taxonomy';
-	$configurations = include( COLLAPSIBLE_CONTENT_DIR . 'config/faq/' . $filename .'.php');
+	$configurations = include( FAQ_MODULE_DIR . '/config/custom/' . $filename .'.php');
 
 	if ( ! $configurations ) {
 		return $configs;
@@ -60,4 +64,5 @@ function register_faq_custom_configs( array $configs ) {
 
 	return $configs;
 }
+
 

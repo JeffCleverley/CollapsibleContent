@@ -11,7 +11,7 @@
  */
 namespace  Deftly\Module\FAQ\Shortcode;
 
-add_shortcode( 'faq', __NAMESPACE__ . '\process_the_shortcode' );
+add_shortcode( 'custom', __NAMESPACE__ . '\process_the_shortcode' );
 /**
  * Process the FAQ Shortcode to display FAQ by ID or by Topic
  *
@@ -66,8 +66,6 @@ function render_single_faq( array $attributes, array $config ) {
 	$post_title         = $faq->post_title;
 	$hidden_content     = do_shortcode( $faq->post_content );
 
-//	ddd($config['views']['container']);
-
 	include( $config['views']['container'] );
 
 }
@@ -85,7 +83,7 @@ function render_single_faq( array $attributes, array $config ) {
 function render_topic_faqs( array $attributes, array $config ) {
 
 	$config_args = array(
-		'post_type'         =>  'faq',
+		'post_type'         =>  'custom',
 		'posts_per_page'    =>  10,
 		'order'             =>  $attributes['order'],
 		'orderby'           =>  $attributes['orderby'],
@@ -110,7 +108,6 @@ function render_topic_faqs( array $attributes, array $config ) {
 	$use_term_container = true;
 	$term_slug = $attributes['topic_slug'];
 
-
 	include( $config['views']['container'] );
 
 	wp_reset_postdata();
@@ -134,7 +131,7 @@ function loop_and_render_faqs_by_topic( \WP_Query $query, array $attributes, arr
 		$post_title = get_the_title();
 		$hidden_content = do_shortcode( get_the_content() );
 
-		include( $config['views']['faq'] );
+		include( $config['views']['custom'] );
 
 	endwhile;
 }
@@ -173,7 +170,7 @@ function get_shortcode_configuration() {
 	return array(
 		'views'     =>  [
 			'container' =>  FAQ_MODULE_DIR . '/views/container.php',
-			'faq'       =>  FAQ_MODULE_DIR . '/views/faq.php',
+			'custom'       =>  FAQ_MODULE_DIR . '/views/custom.php',
 		],
 		'defaults'  =>  [
 			'show_icon'                 =>  'dashicons dashicons-arrow-down-alt2 show-icon',
