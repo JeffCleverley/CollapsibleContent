@@ -25,11 +25,10 @@ function enqueue_assets() {
 	wp_enqueue_style( 'dashicons' );
 	wp_enqueue_script(
 		'collapsible-content-plugin-js',
-		'http://wpsandbox.dev/wp-content/plugins/CollapsibleContent/assets/dist/js/jquery.plugin.min.js',
+		COLLAPSIBLE_CONTENT_URL . '/../assets/dist/js/jquery.plugin.min.js',
 		['jquery'],
 		'0.0.1'
 		);
-
 }
 
 /**
