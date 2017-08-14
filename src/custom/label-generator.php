@@ -49,9 +49,10 @@ function custom_label_generator( array $config, $custom_type = 'post' ) {
 		'not_found'          	=> __( "No {$config['labels']['in_sentence_plural']} found.", $config['labels']['text_domain'] ),
 	];
 
-	$custom_type_generator = $custom_type == 'post' || 'page'
-		? 'Deftly\Module\Custom\generate_custom_labels_for_post_types'
-		: 'Deftly\Module\Custom\generate_custom_labels_for_taxonomies';
+	$custom_type_generator = __NAMESPACE__;
+	$custom_type_generator .= $custom_type == 'post' || 'page'
+		? '\generate_custom_labels_for_post_types'
+		: '\generate_custom_labels_for_taxonomies';
 
 	$labels = array_merge( $labels, $custom_type_generator( $config ) );
 
